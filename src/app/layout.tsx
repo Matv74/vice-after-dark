@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { DEFAULT_LEGAL_LOCALE } from "@/config/legal";
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang={DEFAULT_LEGAL_LOCALE} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         {children}
+        <Analytics />
         <LegalFooter />
       </body>
     </html>
