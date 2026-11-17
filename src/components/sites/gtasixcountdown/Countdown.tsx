@@ -2,18 +2,17 @@
 
 import Image from "next/image";
 import { type CSSProperties, useEffect, useMemo, useSyncExternalStore } from "react";
-import { HOME_LANGUAGE, RELEASE_LISTINGS_NOTE, RELEASE_REGION_KEY, RELEASE_WINDOWS, remainingReleaseSeconds, resolveReleaseWindow } from "../vice-signal/config";
+import { RELEASE_REGION_KEY, RELEASE_WINDOWS, remainingReleaseSeconds, resolveReleaseWindow } from "../vice-signal/config";
 import { assetRoot, coverArt, widgetBackgrounds } from "./assets";
 import { CustomizeSelect } from "./CustomizeSelect";
+import { interfaceCopy } from "./interface-copy";
+import { landingCopy } from "./landing-copy";
+import type { LandingLocale } from "./landing-routes";
 import styles from "./countdown.module.css";
 import siteStyles from "./site.module.css";
 
 const hour = 3600;
 const day = 24 * hour;
-const regionOptions = [
-  { value: "", label: "Auto" },
-  ...RELEASE_WINDOWS.map(window => ({ value: window.id, label: window.labels[HOME_LANGUAGE] })),
-];
 const regionChange = "gta-release-region-change";
 let unsavedChoice: string | null | undefined;
 let regionRequested = false;
@@ -83,7 +82,15 @@ async function requestRegion() {
   }
 }
 
-export function useReleaseRegion() {
+function deviceTimeZone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return undefined;
+  }
+}
+
+function useReleaseRegion() {
   const ready = useSyncExternalStore(subscribeToRegion, () => true, () => false);
   const choice = useSyncExternalStore(subscribeToRegion, readRegion, neutralSnapshot);
   const info = useSyncExternalStore(subscribeToRegion, readRegionInfo, neutralSnapshot);
@@ -93,7 +100,7 @@ export function useReleaseRegion() {
 
   const countryHint = info?.country;
   const release = useMemo(() => ready
-    ? resolveReleaseWindow(choice, countryHint, Intl.DateTimeFormat().resolvedOptions().timeZone)
+    ? resolveReleaseWindow(choice, countryHint, deviceTimeZone())
     : null, [choice, countryHint, ready]);
   return { choice, release, clockOffset: info?.clockOffset ?? 0 };
 }
@@ -134,9 +141,8 @@ function midnightPhase(remaining: number | null) {
   return "";
 }
 
-const englishTimer = { out: "Out Now", label: "Time until GTA VI release", units: ["Days", "Hours", "Minutes", "Seconds"] };
-
-export function Countdown({ effects, copy = englishTimer }: { effects: boolean; copy?: { out: string; label: string; units: readonly string[] } }) {
+export function Countdown({ effects, locale }: { effects: boolean; locale: LandingLocale }) {
+  const copy = landingCopy[locale].timer;
   const { remaining, units } = useCountdown();
   const [days] = units;
   const [primary, secondary] = palettes[days % palettes.length];
@@ -176,25 +182,29 @@ export function Countdown({ effects, copy = englishTimer }: { effects: boolean; 
       </div>
     </div>
   );
+
 }
 
-export function ReleaseRegionSettings() {
-  const { choice, release } = useReleaseRegion();
+export function ReleaseRegionSettings({ locale }: { locale: LandingLocale }) {
+  const { choice } = useReleaseRegion();
   const selected = RELEASE_WINDOWS.some(window => window.id === choice) ? choice ?? "" : "";
+  const copy = interfaceCopy[locale].region;
+  const options = [
+    { value: "", label: copy.auto },
+    ...RELEASE_WINDOWS.map(window => ({ value: window.id, label: window.labels[locale] })),
+  ];
 
   return (
     <div className={siteStyles.releaseRegion}>
-      <CustomizeSelect label="Release region" value={selected} options={regionOptions}
+      <CustomizeSelect label={copy.name} value={selected} options={options}
         onChange={saveRegion} describedBy="gta-release-region-note" />
-      {release?.approximate && <p>Approximate · midnight on 19 November, local time</p>}
-      {!selected && release?.window && <p>Auto · {release.window.labels[HOME_LANGUAGE]}</p>}
-      <p id="gta-release-region-note">{RELEASE_LISTINGS_NOTE}</p>
-      <p>Xbox uses the same windows, unconfirmed.</p>
+      <p id="gta-release-region-note">{copy.note}</p>
     </div>
   );
 }
 
-export function CountdownWidget({ background }: { background: string }) {
+export function CountdownWidget({ background, locale }: { background: string; locale: LandingLocale }) {
+  const copy = landingCopy[locale].timer;
   const { remaining, units } = useCountdown();
   const isTransparent = background === "transparent";
   const image = widgetBackgrounds.some(([, value]) => value === background) && background.endsWith(".webp")
@@ -218,9 +228,9 @@ export function CountdownWidget({ background }: { background: string }) {
     >
       <div className={styles.widgetCard}>
         <Image className={styles.widgetLogo} src={assetRoot + "/logo.png"} alt="GTA VI" width={960} height={729} unoptimized />
-        {remaining === 0 ? <p className={styles.widgetReleased}>Released</p> : (
-          <div className={styles.widgetUnits} role="timer" aria-label="Time until GTA VI release">
-            {["Days", "Hrs", "Min", "Sec"].map((label, index) => (
+        {remaining === 0 ? <p className={styles.widgetReleased}>{copy.out}</p> : (
+          <div className={styles.widgetUnits} role="timer" aria-label={copy.label}>
+            {copy.shortUnits.map((label, index) => (
               <div key={label}><b>{remaining === null ? "–" : units[index]}</b><span>{label}</span></div>
             ))}
           </div>

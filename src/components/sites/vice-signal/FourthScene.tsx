@@ -1,5 +1,8 @@
 "use client";
 
+import type { LandingLocale } from "../gtasixcountdown/landing-routes";
+import { storyCopy } from "./story-copy";
+
 import Image from "next/image";
 import { type CSSProperties, useLayoutEffect, useRef } from "react";
 import poster from "../../../../public/sites/vice-signal/scene-four/ezgif-frame-001.jpg";
@@ -36,7 +39,8 @@ function smoothstep(progress: number) {
   return progress ** 2 * (3 - 2 * progress);
 }
 
-export function FourthScene() {
+export function FourthScene({ locale }: { locale: LandingLocale }) {
+  const copy = storyCopy[locale];
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rangeRef = useRef<HTMLDivElement>(null);
@@ -265,7 +269,7 @@ export function FourthScene() {
       ref={sectionRef}
       id="vice-scene-four"
       className={styles.scene}
-      aria-label="GTA VI scene"
+      aria-label={copy.scene}
       data-frame-count={scene.frameCount}
       style={sceneStyles}
     >
@@ -276,7 +280,7 @@ export function FourthScene() {
             <Image
               className={styles.poster}
               src={scene.poster}
-              alt="Lucia and Jason in front of a burning car"
+              alt={copy.fireArtwork}
               fill
               loading="lazy"
               decoding="async"

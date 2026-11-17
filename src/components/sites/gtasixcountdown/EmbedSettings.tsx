@@ -4,15 +4,20 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { SITE_URL } from "../vice-signal/config";
 import { widgetBackgrounds } from "./assets";
+import { backgroundLabel, interfaceCopy } from "./interface-copy";
+import { landingCopy } from "./landing-copy";
+import { COUNTDOWN_PATHS, type LandingLocale } from "./landing-routes";
 import styles from "./site.module.css";
 
 const sizes = [
-  { value: "small", label: "Small (320x200)", width: 320, height: 150 },
-  { value: "medium", label: "Medium (380x320)", width: 380, height: 240 },
-  { value: "large", label: "Large (450x400)", width: 450, height: 320 },
+  { value: "small", width: 320, height: 150 },
+  { value: "medium", width: 380, height: 240 },
+  { value: "large", width: 450, height: 320 },
 ] as const;
 
-export function EmbedSettings() {
+export function EmbedSettings({ locale }: { locale: LandingLocale }) {
+  const { background: backgroundCopy, embed: copy } = interfaceCopy[locale];
+  const widgetTitle = landingCopy[locale].countdown.heading;
   const [expanded, setExpanded] = useState(false);
   const [background, setBackground] = useState("default");
   const [preset, setPreset] = useState<(typeof sizes)[number]["value"] | "custom">("medium");
@@ -20,12 +25,13 @@ export function EmbedSettings() {
   const [copyStatus, setCopyStatus] = useState("");
   const width = Math.max(200, Math.min(1200, dimensions.width));
   const height = Math.max(150, Math.min(1200, dimensions.height));
-  const hash = "#/widget?bg=" + encodeURIComponent(background);
+  const path = COUNTDOWN_PATHS[locale];
+  const widgetPath = path + "#/widget?bg=" + encodeURIComponent(background);
   const code = expanded
-    ? '<iframe src="' + window.location.origin + window.location.pathname + hash +
+    ? '<iframe src="' + window.location.origin + widgetPath +
       '" width="' + width + '" height="' + height +
-      '" title="GTA 6 Countdown" frameborder="0" style="border:none; overflow:hidden;" scrolling="no"></iframe>' +
-      '\n<p><a href="' + SITE_URL + '/">GTA 6 Countdown</a></p>'
+      '" title="' + widgetTitle + '" frameborder="0" style="border:none; overflow:hidden;" scrolling="no"></iframe>' +
+      '\n<p><a href="' + SITE_URL + path + '">' + widgetTitle + '</a></p>'
     : "";
 
   function updatePreset(value: string) {
@@ -38,9 +44,9 @@ export function EmbedSettings() {
   async function copyCode() {
     try {
       await navigator.clipboard.writeText(code);
-      setCopyStatus("Copied!");
+      setCopyStatus(copy.copied);
     } catch {
-      setCopyStatus("Select the code to copy it.");
+      setCopyStatus(copy.select);
     }
   }
 
@@ -53,25 +59,25 @@ export function EmbedSettings() {
         aria-expanded={expanded}
         aria-controls="gta-embed-options"
       >
-        Embed Widget <ChevronDown size={19} />
+        {copy.heading} <ChevronDown size={19} />
       </button>
       {expanded && (
         <div className={styles.embedBody} id="gta-embed-options">
-          <label>Background:
+          <label>{backgroundCopy}
             <select value={background} onChange={(event) => { setBackground(event.target.value); setCopyStatus(""); }}>
-              {widgetBackgrounds.map(([label, value]) => <option key={value} value={value}>{label}</option>)}
+              {widgetBackgrounds.map(([label, value]) => <option key={value} value={value}>{backgroundLabel(locale, value, label)}</option>)}
             </select>
           </label>
-          <label>Size Preset:
+          <label>{copy.size}
             <select value={preset} onChange={(event) => updatePreset(event.target.value)}>
-              {sizes.map(({ label, value }) => <option key={value} value={value}>{label}</option>)}
-              <option value="custom">Custom Dimensions</option>
+              {sizes.map(({ value, width, height }) => <option key={value} value={value}>{copy.widths[value]} ({width}×{height})</option>)}
+              <option value="custom">{copy.custom}</option>
             </select>
           </label>
           {preset === "custom" && (
             <div className={styles.dimensions}>
               {(["width", "height"] as const).map((axis) => (
-                <label key={axis}>{axis === "width" ? "Width:" : "Height:"}
+                <label key={axis}>{copy[axis]}
                   <input
                     type="number"
                     min={axis === "width" ? 200 : 150}
@@ -86,14 +92,14 @@ export function EmbedSettings() {
               ))}
             </div>
           )}
-          <div>Live Preview:</div>
+          <div>{copy.preview}</div>
           <div className={styles.preview}>
-            <iframe src={"/" + hash} width={width} height={height} title="GTA 6 Countdown Widget Preview" />
+            <iframe src={widgetPath} width={width} height={height} title={copy.preview} />
           </div>
-          <p>Copy the code below to embed the GTA 6 countdown widget on your site:</p>
-          <textarea aria-label="Embed code" value={code} readOnly onFocus={(event) => event.currentTarget.select()} />
+          <p>{copy.instruction}</p>
+          <textarea aria-label={copy.code} value={code} readOnly onFocus={(event) => event.currentTarget.select()} />
           <button className={styles.copy} type="button" onClick={copyCode} aria-live="polite">
-            {copyStatus || "Copy Code"}
+            {copyStatus || copy.copy}
           </button>
         </div>
       )}

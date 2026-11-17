@@ -3,7 +3,10 @@
 import Image from "next/image";
 import { ArrowUpRight, Menu, Play, X } from "lucide-react";
 import { type CSSProperties, type ReactNode, useLayoutEffect, useRef, useState } from "react";
-import { SCREEN_TWO_ART, sections, SITE_NAME, type SectionCard, uk } from "./config";
+import { SCREEN_TWO_ART, sections, SITE_NAME, type SectionCard } from "./config";
+import { interfaceCopy } from "../gtasixcountdown/interface-copy";
+import type { LandingLocale } from "../gtasixcountdown/landing-routes";
+import { storyCopy, storyTitle } from "./story-copy";
 import { FifthScene } from "./FifthScene";
 import { FourthScene } from "./FourthScene";
 import { connectScroll, SCROLL } from "./scroll";
@@ -20,7 +23,8 @@ function trailerUrl(card: SectionCard) {
     : undefined;
 }
 
-function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | null> }) {
+function StoryHeader({ headerRef, locale }: { headerRef: React.RefObject<HTMLElement | null>; locale: LandingLocale }) {
+  const copy = storyCopy[locale];
   const menu = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -32,13 +36,13 @@ function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | n
   return (
     <>
       <header ref={headerRef} className={styles.header} inert>
-        <a className={styles.brand} href="#countdown" aria-label={SITE_NAME + " — Home"}>
+        <a className={styles.brand} href="#countdown" aria-label={SITE_NAME + " — " + copy.home}>
           {SITE_NAME}
         </a>
         <div className={styles.headerActions}>
           <button
             className={styles.iconButton}
-            type="button" aria-label="Open menu" aria-haspopup="dialog"
+            type="button" aria-label={copy.openMenu} aria-haspopup="dialog"
             aria-expanded={open} aria-controls="vice-menu" onClick={openMenu}
           >
             <Menu aria-hidden="true" />
@@ -46,20 +50,20 @@ function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | n
         </div>
       </header>
       <dialog
-        ref={menu} id="vice-menu" className={styles.menu} aria-label="Site sections"
+        ref={menu} id="vice-menu" className={styles.menu} aria-label={copy.sections}
         onClose={() => setOpen(false)}
       >
         <div className={styles.menuHeader}>
           <a className={styles.brand} href="#countdown" onClick={() => menu.current?.close()}>{SITE_NAME}</a>
           <button
-            className={styles.iconButton} type="button" aria-label="Close menu"
+            className={styles.iconButton} type="button" aria-label={copy.closeMenu}
             onClick={() => menu.current?.close()}
           >
             <X aria-hidden="true" />
           </button>
         </div>
-        <nav aria-label="Site sections">
-          <a href="#countdown" onClick={() => menu.current?.close()}>Release countdown</a>
+        <nav aria-label={copy.sections}>
+          <a href="#countdown" onClick={() => menu.current?.close()}>{copy.countdown}</a>
           {sections.map((section) => {
             const videoUrl = trailerUrl(section);
 
@@ -71,7 +75,7 @@ function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | n
                 rel={videoUrl ? "noopener noreferrer" : undefined}
                 onClick={() => menu.current?.close()}
               >
-                {section.title}<ArrowUpRight aria-hidden="true" />
+                {storyTitle(copy, section)}<ArrowUpRight aria-hidden="true" />
               </a>
             );
           })}
@@ -81,8 +85,10 @@ function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | n
   );
 }
 
-function Card({ card, featured }: { card: SectionCard; featured?: boolean }) {
+function Card({ card, featured, locale }: { card: SectionCard; featured?: boolean; locale: LandingLocale }) {
   const videoUrl = trailerUrl(card);
+  const copy = storyCopy[locale];
+  const title = storyTitle(copy, card);
 
   return (
     <div className={styles.cardSlot}>
@@ -97,7 +103,7 @@ function Card({ card, featured }: { card: SectionCard; featured?: boolean }) {
           {card.image && (
             <Image
               src={card.image}
-              alt={card.title}
+              alt={title}
               fill
               unoptimized={card.imageUnoptimized}
               sizes={featured
@@ -112,12 +118,12 @@ function Card({ card, featured }: { card: SectionCard; featured?: boolean }) {
           </span>
         )}
         <div className={styles.cardText}>
-          <span className={styles.label}>{card.label}</span>
-          <h3>{card.title}</h3>
+          <span className={styles.label}>{copy.watch}</span>
+          <h3>{title}</h3>
           {featured && (
             <span className={styles.featuredAction} aria-hidden="true">
               <Play fill="currentColor" />
-              {uk.openSection}
+              {copy.play}
             </span>
           )}
         </div>
@@ -126,7 +132,8 @@ function Card({ card, featured }: { card: SectionCard; featured?: boolean }) {
   );
 }
 
-export function ViceStory({ children }: { children: ReactNode }) {
+export function ViceStory({ children, locale }: { children: ReactNode; locale: LandingLocale }) {
+  const copy = storyCopy[locale];
   const story = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const hero = useRef<HTMLDivElement>(null);
@@ -165,7 +172,7 @@ export function ViceStory({ children }: { children: ReactNode }) {
         <div className={styles.artFrame}>
           <div className={styles.artScene}>
             <Image
-              ref={artwork} src={SCREEN_TWO_ART} alt="Lucia and Jason next to a car at sunset in Vice City" fill
+              ref={artwork} src={SCREEN_TWO_ART} alt={copy.artwork} fill
               sizes="100vw" unoptimized preload decoding="async"
               className={styles.artwork}
             />
@@ -175,25 +182,25 @@ export function ViceStory({ children }: { children: ReactNode }) {
       </div>
       <div className={styles.runway} aria-hidden="true" />
       <div className={styles.ukrainian} id="sections">
-        <StoryHeader headerRef={header} />
+        <StoryHeader headerRef={header} locale={locale} />
         <section ref={panel} className={styles.panel} id="vice-panel" aria-labelledby="vice-sections-heading">
           <div className={styles.column}>
-            <h2 className="sr-only" id="vice-sections-heading">Trailers</h2>
-            <Card card={featured} featured />
+            <h2 className="sr-only" id="vice-sections-heading">{copy.trailers}</h2>
+            <Card card={featured} featured locale={locale} />
             <div className={styles.primaryCards}>
-              {primaryCards.map((card) => <Card key={card.id} card={card} />)}
+              {primaryCards.map((card) => <Card key={card.id} card={card} locale={locale} />)}
             </div>
             {extraCards.length > 0 && (
               <div className={styles.extraCards}>
-                {extraCards.map((card) => <Card key={card.id} card={card} />)}
+                {extraCards.map((card) => <Card key={card.id} card={card} locale={locale} />)}
               </div>
             )}
           </div>
-          <footer className={styles.legal} lang="en">{uk.disclaimer}</footer>
+          <footer className={styles.legal}>{interfaceCopy[locale].disclaimer}</footer>
         </section>
       </div>
-      <FourthScene />
-      <FifthScene />
+      <FourthScene locale={locale} />
+      <FifthScene locale={locale} />
     </div>
   );
 }

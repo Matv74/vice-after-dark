@@ -2,18 +2,21 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalEmbed } from "@/components/legal/ExternalEmbed";
+import { interfaceCopy } from "./interface-copy";
+import type { LandingLocale } from "./landing-routes";
 import { newsLink, type NewsFeedResponse, type NewsItem } from "./news-data";
 import styles from "./news.module.css";
 
-const itemDate = new Intl.DateTimeFormat("en-US", {
+const dateOptions: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "short",
   day: "numeric",
   hour: "2-digit",
   minute: "2-digit",
-});
+};
 
-function NewsCard({ item, open }: { item: NewsItem; open: boolean }) {
+function NewsCard({ item, open, locale }: { item: NewsItem; open: boolean; locale: LandingLocale }) {
+  const copy = interfaceCopy[locale].news;
   const link = newsLink(item.linkUrl);
   const tweet = newsLink(item.tweetUrl);
   const tweetId = tweet &&
@@ -27,23 +30,23 @@ function NewsCard({ item, open }: { item: NewsItem; open: boolean }) {
 
   return (
     <article className={`${styles.card} ${item.important ? styles.important : ""}`}>
-      <h3>{item.title}</h3>
-      {item.important && <span className={styles.badge}>Important</span>}
+      <h3 lang="en">{item.title}</h3>
+      {item.important && <span className={styles.badge}>{copy.important}</span>}
       <time className={styles.date} dateTime={item.date}>
-        {itemDate.format(new Date(item.date))}
+        {new Date(item.date).toLocaleString(locale, dateOptions)}
       </time>
       <div className={styles.content}>
-        {item.content && <p>{item.content}</p>}
+        {item.content && <p lang="en">{item.content}</p>}
         {open && videoId && (
           <ExternalEmbed
             className={styles.video}
             provider="YouTube"
             id={videoId}
-            title={`Video for ${item.title}`}
+            title={`${copy.video} ${item.title}`}
           />
         )}
         {tweet && tweetId && tweet.href !== link?.href && (
-          <a className={styles.link} href={tweet.href} target="_blank" rel="noreferrer">View post on X →</a>
+          <a className={styles.link} href={tweet.href} target="_blank" rel="noreferrer">{copy.viewPost} →</a>
         )}
         {link && (
           <a
@@ -51,9 +54,9 @@ function NewsCard({ item, open }: { item: NewsItem; open: boolean }) {
             href={link.href}
             target="_blank"
             rel="noreferrer"
-            aria-label={`Open ${item.title}`}
+            aria-label={`${copy.open} ${item.title}`}
           >
-            Click to open link <span aria-hidden="true">→</span>
+            {copy.openLink} <span aria-hidden="true">→</span>
           </a>
         )}
       </div>
@@ -61,7 +64,8 @@ function NewsCard({ item, open }: { item: NewsItem; open: boolean }) {
   );
 }
 
-export function NewsFeed({ open }: { open: boolean }) {
+export function NewsFeed({ open, locale }: { open: boolean; locale: LandingLocale }) {
+  const copy = interfaceCopy[locale].news;
   const [items, setItems] = useState<NewsItem[]>([]);
   const [updated, setUpdated] = useState<Date | null>(null);
   const [saved, setSaved] = useState(false);
@@ -119,24 +123,24 @@ export function NewsFeed({ open }: { open: boolean }) {
       className={`${styles.drawer} ${open ? styles.open : ""}`}
     >
       <header className={styles.header}>
-        <h2 id="gta-news-heading">Latest News</h2>
+        <h2 id="gta-news-heading">{copy.title}</h2>
         <div className={styles.controls}>
           <button
             type="button"
             className={styles.refresh}
             onClick={refresh}
             disabled={loading}
-            aria-label={loading ? "Refreshing news" : "Refresh news"}
-            title={loading ? "Refreshing news..." : "Refresh news"}
+            aria-label={loading ? copy.refreshing : copy.refresh}
+            title={loading ? copy.refreshing : copy.refresh}
           >
             ↻
           </button>
           {updated && (
             <span
               className={styles.updated}
-              title={saved ? "Showing the saved source feed" : undefined}
+              title={saved ? copy.cached : undefined}
             >
-              {saved ? "Saved feed" : `Updated ${updated.toLocaleTimeString("en-US", {
+              {saved ? copy.saved : `${copy.updated} ${updated.toLocaleTimeString(locale, {
                 hour: "2-digit",
                 minute: "2-digit",
               })}`}
@@ -145,16 +149,16 @@ export function NewsFeed({ open }: { open: boolean }) {
         </div>
       </header>
       {failed && (
-        <p className={styles.error} role="status">Failed to load news. Please try again later.</p>
+        <p className={styles.error} role="status">{copy.failed}</p>
       )}
       {open && !failed && items.length === 0 && (
         <p className={styles.message} role="status">
-          {loading || !updated ? "Loading news..." : "No news available at the moment."}
+          {loading || !updated ? copy.loading : copy.empty}
         </p>
       )}
       <div className={styles.list}>
         {items.map((item) => (
-          <NewsCard key={item.id} item={item} open={open} />
+          <NewsCard key={item.id} item={item} open={open} locale={locale} />
         ))}
       </div>
     </aside>

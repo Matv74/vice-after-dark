@@ -97,6 +97,7 @@
   margin: 0;
   color: #ffd6e5;
   font-size: clamp(.8125rem, 2.5vw, .9375rem);
+  font-weight: 400;
   line-height: 1.4;
   text-wrap: balance;
 }
@@ -246,7 +247,7 @@
 }
 
 .pickerLabel { margin-bottom: 8px; font-size: 1.05rem; text-transform: uppercase; }
-.backgroundSetting { margin-bottom: 22px; }
+.pickerSetting { margin-bottom: 22px; }
 
 .releaseRegion {
   margin-bottom: 20px;
@@ -483,7 +484,7 @@
   .customization { bottom: 8px; width: calc(100% - 16px); max-height: 88dvh; padding: 16px 14px; }
   .customization h2 { margin-bottom: 20px; font-size: 1.4rem; }
   .pickerLabel { font-size: .9rem; }
-  .backgroundSetting { margin-bottom: 14px; }
+  .pickerSetting { margin-bottom: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

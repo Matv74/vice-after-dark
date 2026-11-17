@@ -4,6 +4,8 @@ import Image from "next/image";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import { ProviderNotice } from "@/components/legal/ExternalEmbed";
+import { interfaceCopy } from "./interface-copy";
+import type { LandingLocale } from "./landing-routes";
 import styles from "./music.module.css";
 
 const assetPath = "/sites/gtasixcountdown/music";
@@ -62,6 +64,7 @@ declare global {
 type MusicPlayerProps = {
   open: boolean;
   footerVisible: boolean;
+  locale: LandingLocale;
   onPlayingChange?: (playing: boolean) => void;
 };
 
@@ -90,7 +93,8 @@ function PlayerIcon({ name }: { name: IconName }) {
   );
 }
 
-export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlayerProps) {
+export function MusicPlayer({ open, footerVisible, onPlayingChange, locale }: MusicPlayerProps) {
+  const copy = interfaceCopy[locale].music;
   const frame = useRef<HTMLIFrameElement>(null);
   const widget = useRef<SoundCloudWidget | null>(null);
   const playTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -239,7 +243,7 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
       />
       <iframe
         ref={frame}
-        title="GTA VI The Album Audio Stream"
+        title={copy.stream}
         className={styles.stream}
         src={widgetSource}
         allow="autoplay; encrypted-media"
@@ -250,7 +254,7 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
 
       <section
         id="gta-music-player"
-        aria-label="GTA VI Audio Player"
+        aria-label={copy.player}
         inert={!open}
         className={`${styles.panel} ${open ? styles.open : ""} ${footerVisible ? styles.withFooter : ""}`}
       >
@@ -260,7 +264,7 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
         {!enabled && (
           <div className={styles.streamError}>
             <ProviderNotice provider="SoundCloud" />
-            <button type="button" onClick={() => setEnabled(true)}>Load SoundCloud</button>
+            <button type="button" onClick={() => setEnabled(true)}>{copy.load}</button>
           </div>
         )}
 
@@ -269,7 +273,7 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
             <div className={`${styles.record} ${playing ? styles.spinning : ""}`} aria-hidden="true">
               <span className={styles.label} />
             </div>
-            <Image className={styles.cover} src={albumCover} alt="GTA VI: The Album cover" width={130} height={130} unoptimized />
+            <Image className={styles.cover} src={albumCover} alt={copy.cover} width={130} height={130} unoptimized />
           </div>
         </div>
 
@@ -282,7 +286,7 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
           <div className={styles.scrubber}>
             <progress value={Math.min(duration, position)} max={duration} aria-hidden="true" />
             <input
-              type="range" aria-label="Seek track" min={0} max={duration} step={0.5}
+              type="range" aria-label={copy.seek} min={0} max={duration} step={0.5}
               value={Math.min(duration, position)} disabled={status !== "ready"}
               onChange={(event) => changePosition(Number(event.target.value))}
             />
@@ -294,7 +298,7 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
         </div>
 
         <div className={styles.primary}>
-          <button type="button" aria-label="Previous track" title="Previous track" onClick={() => {
+          <button type="button" aria-label={copy.previous} title={copy.previous} onClick={() => {
             if (position > 3) changePosition(0);
             else selectTrack(trackIndex - 1);
           }}>
@@ -303,8 +307,8 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
           <button
             type="button"
             className={styles.play}
-            aria-label={playing ? "Pause music" : "Play music"}
-            title={status === "loading" ? "Loading SoundCloud player…" : playing ? "Pause" : "Play"}
+            aria-label={playing ? copy.pause : copy.play}
+            title={status === "loading" ? copy.loading : playing ? copy.pause : copy.play}
             disabled={!enabled || status === "unavailable"}
             onClick={() => {
               if (status === "loading") playbackRequested.current = true;
@@ -314,11 +318,11 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
           >
             <PlayerIcon name={playing ? "pause" : "play"} />
           </button>
-          <button type="button" aria-label="Next track" title="Next track" onClick={() => selectTrack(trackIndex + 1)}>
+          <button type="button" aria-label={copy.next} title={copy.next} onClick={() => selectTrack(trackIndex + 1)}>
             <PlayerIcon name="next" />
           </button>
-          <button type="button" aria-label={repeat ? "Disable repeat" : "Enable repeat"} aria-pressed={repeat}
-            title={`Repeat Song: ${repeat ? "On" : "Off"}`} onClick={() => {
+          <button type="button" aria-label={repeat ? copy.repeatOff : copy.repeatOn} aria-pressed={repeat}
+            title={repeat ? copy.repeatOff : copy.repeatOn} onClick={() => {
               repeatTrack.current = !repeat;
               setRepeat(!repeat);
             }}>
@@ -326,26 +330,26 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
           </button>
         </div>
 
-        {status === "unavailable" && <p className={styles.streamError} role="status">SoundCloud playback is unavailable. <a href={soundCloudPlaylist} target="_blank" rel="noreferrer">Open the playlist</a>.</p>}
+        {status === "unavailable" && <p className={styles.streamError} role="status">{copy.unavailable} <a href={soundCloudPlaylist} target="_blank" rel="noreferrer">{copy.playlist}</a></p>}
 
         <div className={styles.secondary}>
           <div className={styles.volume}>
-            <button type="button" aria-label="Toggle mute" title={muted || volume === 0 ? "Unmute" : "Mute"} onClick={toggleMute}>
+            <button type="button" aria-label={muted || volume === 0 ? copy.unmute : copy.mute} title={muted || volume === 0 ? copy.unmute : copy.mute} onClick={toggleMute}>
               <PlayerIcon name={muted || volume === 0 ? "mute" : volume < 50 ? "volume-low" : "volume-high"} />
             </button>
-            <input type="range" aria-label="Volume slider" min={0} max={100} value={muted ? 0 : volume}
+            <input type="range" aria-label={copy.volume} min={0} max={100} value={muted ? 0 : volume}
               onChange={(event) => changeVolume(Number(event.target.value))} />
           </div>
 
           <div className={styles.actions}>
-            <a href={youtubePlaylist} target="_blank" rel="noreferrer" aria-label="Open playlist on YouTube" title="Open playlist on YouTube">
+            <a href={youtubePlaylist} target="_blank" rel="noreferrer" aria-label={copy.youtube} title={copy.youtube}>
               <PlayerIcon name="youtube" /><span>YouTube</span>
             </a>
-            <button type="button" aria-label="Toggle tracklist" title="View tracklist" aria-expanded={showTracks}
+            <button type="button" aria-label={copy.tracklist} title={copy.tracklist} aria-expanded={showTracks}
               aria-controls="gta-album-tracklist" onClick={() => setShowTracks(!showTracks)}>
-              <PlayerIcon name="tracklist" /><span>Tracks</span>
+              <PlayerIcon name="tracklist" /><span>{copy.tracks}</span>
             </button>
-            <a href={soundCloudPlaylist} target="_blank" rel="noreferrer" aria-label="Open playlist on SoundCloud" title="Open playlist on SoundCloud">
+            <a href={soundCloudPlaylist} target="_blank" rel="noreferrer" aria-label={copy.soundcloud} title={copy.soundcloud}>
               <PlayerIcon name="external-link" />
             </a>
           </div>
@@ -359,7 +363,7 @@ export function MusicPlayer({ open, footerVisible, onPlayingChange }: MusicPlaye
                   onClick={() => selectTrack(index)}>
                   <span className={styles.trackNumber}>{index + 1}</span>
                   <span className={styles.trackDetails}><strong>{title}</strong><small>{artist}</small></span>
-                  {trackIndex === index && <span className={`${styles.equalizer} ${playing ? styles.running : ""}`} aria-label={playing ? "Playing" : "Selected"}>
+                  {trackIndex === index && <span className={`${styles.equalizer} ${playing ? styles.running : ""}`} aria-label={playing ? copy.playing : copy.selected}>
                     <i /><i /><i /><i />
                   </span>}
                 </button>
