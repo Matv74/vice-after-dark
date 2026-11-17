@@ -1,7 +1,5 @@
 const preloadRadius = 3;
-const maxPending = 3;
-
-export function createFrameBuffer(frameCount: number, source: (index: number) => string, onSettled: () => void) {
+export function createFrameBuffer(frameCount: number, source: (index: number) => string, onSettled: () => void, maxPending = 3) {
   const decoded = new Map<number, HTMLImageElement>();
   const pending = new Map<number, HTMLImageElement>();
   const failed = new Set<number>();
@@ -11,12 +9,14 @@ export function createFrameBuffer(frameCount: number, source: (index: number) =>
     image.removeAttribute("src");
   }
 
-  function load(index: number) {
+  function load(index: number, speculative: boolean) {
     const image = new Image();
     pending.set(index, image);
     image.src = source(index);
 
-    void image.decode().then(
+    const decode = () => {
+      if (pending.get(index) !== image) return;
+      void image.decode().then(
       () => {
         if (pending.get(index) !== image) return;
         pending.delete(index);
@@ -29,7 +29,13 @@ export function createFrameBuffer(frameCount: number, source: (index: number) =>
         failed.add(index);
         onSettled();
       },
-    );
+      );
+    };
+    if (speculative && typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(decode, { timeout: 80 });
+    } else {
+      decode();
+    }
   }
 
   return {
@@ -50,7 +56,7 @@ export function createFrameBuffer(frameCount: number, source: (index: number) =>
       }
 
       for (const index of requested) {
-        if (!pending.has(index)) load(index);
+        if (!pending.has(index)) load(index, maxPending === 2 && index !== target);
       }
     },
 

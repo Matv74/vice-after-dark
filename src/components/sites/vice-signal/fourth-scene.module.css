@@ -81,3 +81,28 @@
     mask-image: linear-gradient(transparent, #000 7%, #000 93%, transparent);
   }
 }
+
+@media (max-width: 768px) and (pointer: coarse) {
+  .scene .frame {
+    background:
+      radial-gradient(ellipse at 52% 86%, #987742 0%, #98774200 64%),
+      radial-gradient(ellipse at 27% 13%, #706139 0%, #70613900 63%),
+      linear-gradient(180deg, #4b432d 0%, #615632 30%, #82633c 70%, #573d24 100%);
+  }
+
+  [data-pinned] > .scene .frame::before { content: none; }
+
+  .posterFrame,
+  [data-pinned] > .scene .posterFrame {
+    block-size: min(54svh, 112vw);
+    mask-image: linear-gradient(transparent, #000 8%, #000 91%, transparent);
+    overflow: clip;
+  }
+
+  .poster {
+    object-fit: cover;
+    object-position: 50% 48%;
+  }
+
+  .posterFrame picture img { transform: scale(var(--mobile-poster-scale, 1)); }
+}

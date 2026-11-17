@@ -5,11 +5,13 @@ import { type CSSProperties, useLayoutEffect, useRef } from "react";
 import poster from "../../../../public/sites/vice-signal/scene-four/ezgif-frame-001.jpg";
 import { createFrameBuffer } from "./fourth-scene-frames";
 import { panelOffset, SCROLL } from "./scroll";
+import { MOBILE_TOUCH_QUERY } from "./mobile-motion";
 import styles from "./fourth-scene.module.css";
 
 const scene = {
   poster,
   frameCount: 53,
+  mobile: { frameCount: 36, path: "/sites/vice-signal/scene-four-m", width: 720, height: 405 },
   revealRangeVh: 1,
   extraScrollVh: 0.5,
 } as const;
@@ -24,6 +26,10 @@ const sceneStyles = {
 
 function frameSource(index: number) {
   return index === 1 ? scene.poster.src : `/sites/vice-signal/scene-four/ezgif-frame-${String(index).padStart(3, "0")}.jpg`;
+}
+
+function mobileFrameSource(index: number) {
+  return `${scene.mobile.path}/frame-${String(index).padStart(3, "0")}.webp`;
 }
 
 function smoothstep(progress: number) {
@@ -44,7 +50,24 @@ export function FourthScene() {
     if (!section || !canvas || !rangeMarker || !story || !(fifthPanel instanceof HTMLElement)) return;
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const frames = createFrameBuffer(scene.frameCount, frameSource, schedule);
+    const mobile = window.matchMedia(MOBILE_TOUCH_QUERY);
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    let compact = mobile.matches;
+    let nearScene = !compact;
+    let needsPrepare = true;
+    let measuredWidth = window.innerWidth;
+    let measuredDpr = window.devicePixelRatio;
+    let frames = makeBuffer();
+
+    function makeBuffer() {
+      return createFrameBuffer(compact ? scene.mobile.frameCount : scene.frameCount,
+        compact ? mobileFrameSource : frameSource, () => {
+          needsPrepare = true;
+          schedule();
+        }, compact ? 2 : undefined);
+    }
 
     let context: CanvasRenderingContext2D | null | undefined;
     let animationFrame = 0;
@@ -77,6 +100,7 @@ export function FourthScene() {
       targetFrame = 1;
       displayedFrame = 1;
       canvas.removeAttribute("data-frame-index");
+      needsPrepare = true;
     };
 
     const render = () => {
@@ -126,11 +150,18 @@ export function FourthScene() {
         section.toggleAttribute("data-scene-four-active", progress > 0);
       }
 
-      if (scroll < start - length) {
+      const posterOnly = compact && (connection?.saveData || ["slow-2g", "2g", "3g"].includes(connection?.effectiveType ?? ""));
+      if (posterOnly) section.style.setProperty("--mobile-poster-scale", String(1 + progress * .04));
+      else section.style.removeProperty("--mobile-poster-scale");
+
+      if (scroll < start - length || (compact && (!nearScene || posterOnly || scroll > fifthRelease + viewport))) {
         resetFrames();
         return;
       }
-      if (context === undefined) context = canvas.getContext("2d", { alpha: false });
+      if (context === undefined) {
+        context = canvas.getContext("2d", { alpha: false });
+        if (context && compact) context.imageSmoothingQuality = "low";
+      }
       if (!context) return;
 
       buffering = true;
@@ -138,10 +169,15 @@ export function FourthScene() {
       // Scroll can stop a fraction of a CSS pixel before the measured end.
       const playbackProgress = scroll >= start + playbackLength - 0.5
         ? 1 : Math.max(0, (scroll - start) / playbackLength);
-      const index = 1 + Math.round(playbackProgress * (scene.frameCount - 1));
-      if (index !== targetFrame) direction = Math.sign(index - targetFrame);
+      const count = compact ? scene.mobile.frameCount : scene.frameCount;
+      const index = 1 + Math.round(playbackProgress * (count - 1));
+      const changedFrame = index !== targetFrame;
+      if (changedFrame) direction = Math.sign(index - targetFrame);
       targetFrame = index;
-      frames.prepare(targetFrame, direction);
+      if (!compact || changedFrame || needsPrepare) {
+        needsPrepare = false;
+        frames.prepare(targetFrame, direction);
+      }
 
       const next = frames.closest(targetFrame, displayedFrame);
       if (!next) return;
@@ -159,26 +195,68 @@ export function FourthScene() {
       schedule();
     }
 
-    const observer = new ResizeObserver(refresh);
+    function resize() {
+      if (!compact) {
+        refresh();
+        return;
+      }
+      const width = window.innerWidth;
+      const dpr = window.devicePixelRatio;
+      if (width === measuredWidth && dpr === measuredDpr) return;
+      measuredWidth = width;
+      measuredDpr = dpr;
+      resetFrames();
+      sizeCanvas();
+      refresh();
+    }
+
+    function sizeCanvas() {
+      const width = compact ? Math.round(measuredWidth * Math.min(measuredDpr, 1.5)) : scene.poster.width;
+      canvas!.width = width;
+      canvas!.height = compact ? Math.round(width * scene.mobile.height / scene.mobile.width) : scene.poster.height;
+      context = undefined;
+    }
+
+    function switchSet() {
+      resetFrames();
+      compact = mobile.matches;
+      frames = makeBuffer();
+      measuredWidth = window.innerWidth;
+      measuredDpr = window.devicePixelRatio;
+      sizeCanvas();
+      refresh();
+    }
+
+    const proximity = new IntersectionObserver(([entry]) => {
+      nearScene = entry.isIntersecting;
+      if (compact) schedule();
+    }, { rootMargin: "100% 0px" });
+    proximity.observe(section);
+    const observer = new ResizeObserver(resize);
     observer.observe(story);
     observer.observe(section);
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", refresh, { passive: true });
+    window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pageshow", refresh);
     motion.addEventListener("change", refresh);
+    mobile.addEventListener("change", switchSet);
+    if (compact) sizeCanvas();
     schedule();
 
     return () => {
       window.cancelAnimationFrame(animationFrame);
       window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", refresh);
+      window.removeEventListener("resize", resize);
       window.removeEventListener("pageshow", refresh);
       motion.removeEventListener("change", refresh);
+      mobile.removeEventListener("change", switchSet);
+      proximity.disconnect();
       observer.disconnect();
       resetFrames();
       resetFifthPanel();
       section.removeAttribute("data-scene-four-active");
       section.style.removeProperty("--scene-four-shade");
+      section.style.removeProperty("--mobile-poster-scale");
     };
   }, []);
 
@@ -193,15 +271,19 @@ export function FourthScene() {
     >
       <div className={styles.frame}>
         <div className={styles.posterFrame}>
-          <Image
-            className={styles.poster}
-            src={scene.poster}
-            alt="Lucia and Jason in front of a burning car"
-            fill
-            loading="lazy"
-            placeholder="blur"
-            unoptimized
-          />
+          <picture>
+            <source media={MOBILE_TOUCH_QUERY} srcSet={mobileFrameSource(1)} />
+            <Image
+              className={styles.poster}
+              src={scene.poster}
+              alt="Lucia and Jason in front of a burning car"
+              fill
+              loading="lazy"
+              decoding="async"
+              placeholder="blur"
+              unoptimized
+            />
+          </picture>
           <canvas
             ref={canvasRef}
             className={`${styles.poster} ${styles.canvas}`}

@@ -1,6 +1,7 @@
 "use client";
 
 import { ViceStory } from "@/components/sites/vice-signal/ViceStory";
+import { MOBILE_TOUCH_QUERY } from "@/components/sites/vice-signal/mobile-motion";
 import Image from "next/image";
 import { ChevronUp, Newspaper, Settings } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -26,7 +27,7 @@ type Preferences = typeof defaults;
 type Panel = "customize" | "news" | "music";
 
 const settingsKey = "gta-countdown-preferences";
-const defaultSettings = JSON.stringify(defaults);
+const defaultSettings = "{}";
 let temporarySettings: string | undefined;
 
 function readSettings() {
@@ -47,18 +48,23 @@ function subscribeToSettings(notify: () => void) {
   };
 }
 
-function parseSettings(raw: string): Preferences {
+function readPreferences(raw: string): Partial<Preferences> {
   try {
-    const parsed = { ...defaults, ...JSON.parse(raw) } as Preferences;
-    if (!backgroundFiles.includes(parsed.background)) parsed.background = coverArt;
-    return parsed;
+    const saved: unknown = JSON.parse(raw);
+    return saved && typeof saved === "object" && !Array.isArray(saved) ? saved as Partial<Preferences> : {};
   } catch {
-    return defaults;
+    return {};
   }
 }
 
+function parseSettings(raw: string, compact = false): Preferences {
+  const parsed = { ...defaults, showDailyEffects: !compact, ...readPreferences(raw) };
+  if (!backgroundFiles.includes(parsed.background)) parsed.background = coverArt;
+  return parsed;
+}
+
 function saveSettings(update: Partial<Preferences>) {
-  const value = JSON.stringify({ ...parseSettings(readSettings()), ...update });
+  const value = JSON.stringify({ ...readPreferences(readSettings()), ...update });
   try {
     localStorage.setItem(settingsKey, value);
   } catch {
@@ -75,6 +81,13 @@ function subscribeToHash(notify: () => void) {
 const currentHash = () => window.location.hash;
 const emptyHash = () => "";
 const serverSettings = () => defaultSettings;
+const desktopSnapshot = () => false;
+const mobileSnapshot = () => window.matchMedia(MOBILE_TOUCH_QUERY).matches;
+function subscribeToMobile(notify: () => void) {
+  const media = window.matchMedia(MOBILE_TOUCH_QUERY);
+  media.addEventListener("change", notify);
+  return () => media.removeEventListener("change", notify);
+}
 
 const toggles = [
   ["Show Footer Toggle", "showFooterToggle"],
@@ -101,7 +114,8 @@ function BackgroundMedia({ file, fading }: { file: Preferences["background"]; fa
 }
 
 function CountdownPage() {
-  const settings = parseSettings(useSyncExternalStore(subscribeToSettings, readSettings, serverSettings));
+  const compact = useSyncExternalStore(subscribeToMobile, mobileSnapshot, desktopSnapshot);
+  const settings = parseSettings(useSyncExternalStore(subscribeToSettings, readSettings, serverSettings), compact);
   const [panel, setPanel] = useState<Panel | null>(null);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [musicPlaying, setMusicPlaying] = useState(false);

@@ -1,3 +1,5 @@
+import { MOBILE_TOUCH_QUERY } from "./mobile-motion";
+
 const settleTime = 42;
 const settleDistance = 0.75;
 const pixelsPerLine = 16;
@@ -18,6 +20,7 @@ function usesNativeScroll(event: WheelEvent) {
 
 export function connectWheelScroll() {
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const mobile = window.matchMedia(MOBILE_TOUCH_QUERY);
   let frame = 0;
   let position = 0;
   let target = 0;
@@ -46,7 +49,7 @@ export function connectWheelScroll() {
   }
 
   function wheel(event: WheelEvent) {
-    if (motion.matches) return;
+    if (motion.matches || mobile.matches) return;
     if (!event.cancelable || event.defaultPrevented || usesNativeScroll(event)) {
       if (frame) stop();
       return;

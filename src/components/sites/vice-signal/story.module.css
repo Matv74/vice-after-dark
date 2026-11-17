@@ -516,6 +516,27 @@
   .featured .cardText h3 { font-size: clamp(1.8rem, 5.5vw, 3rem); }
 }
 
+@media (max-width: 768px) and (pointer: coarse) {
+  .story[data-pinned]:not([data-panel-entered]) .panel {
+    visibility: hidden;
+  }
+
+  .story[data-pinned] .panel {
+    /* Align the entry with the tallest visible viewport, even when browser bars retract. */
+    transform: translate3d(0, calc(var(--panel-shift, 0px) + (100lvh - 100svh) * var(--panel-mobile-gap-factor, 1)), 0);
+  }
+
+  .artScene::before {
+    inset: 0;
+    background: radial-gradient(ellipse at center, #3c283e, var(--screen3-bg) 78%);
+    filter: none;
+  }
+
+  .panel { padding-top: max(clamp(48px, 12vw, 60px), env(safe-area-inset-top)); }
+  .column { width: auto; margin-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right)); }
+  .featured { min-height: clamp(180px, 52vw, 220px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .story:not([data-pinned]) .artScene { opacity: .62; transition: opacity var(--reduced-fade); }
   .story[data-art-arriving] .artScene { opacity: 1; }

@@ -490,3 +490,14 @@
   .equalizer i { animation: none; }
   .control, .customization { transition: none; }
 }
+@media (max-width: 768px) and (pointer: coarse) {
+  .site { min-height: 100svh; }
+  .overlay { backdrop-filter: none; }
+  .content {
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+  }
+  .customize { top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
+  .news { top: max(15px, env(safe-area-inset-top)); left: max(15px, env(safe-area-inset-left)); }
+  .music { right: max(15px, env(safe-area-inset-right)); }
+  .customization { bottom: max(20px, env(safe-area-inset-bottom)); }
+}

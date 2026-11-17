@@ -1,6 +1,7 @@
 // Visual reference: https://www.rockstargames.com/VI (inspiration only, no assets or code copied)
 
 import { SCREEN_TWO_ART } from "./config";
+import { MOBILE_TOUCH_QUERY } from "./mobile-motion";
 
 export const SCROLL = {
   INTRO_RANGE_VH: 1,
@@ -92,6 +93,8 @@ type SceneElements = {
 
 export function connectScroll({ story, stage, hero, artwork, header, panel }: SceneElements) {
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const mobileTouch = window.matchMedia(MOBILE_TOUCH_QUERY);
+  let previousWidth = window.innerWidth;
   const zoom = curves[SCROLL.EASING.zoom];
   const recede = curves[SCROLL.EASING.recede];
   const coverScale = 1 / Math.min(1, SCROLL.RECEDE_SCALE_TO);
@@ -152,6 +155,10 @@ export function connectScroll({ story, stage, hero, artwork, header, panel }: Sc
       : Number(distance >= recedeStart);
     const panelRange = release - panelStart;
     const panelProgress = ratio((distance - panelStart) / panelRange);
+    if (mobileTouch.matches) {
+      story.toggleAttribute("data-panel-entered", enhanced && panelProgress > 0);
+      panel.style.setProperty("--panel-mobile-gap-factor", String(1 - panelProgress));
+    }
     const artworkStart = introEnd * SCROLL.S2_START;
     const recedeScaleProgress = ratio((distance - artworkStart) / (release - artworkStart));
     const artProgress = ratio((intro - SCROLL.S2_START) / (1 - SCROLL.S2_START));
@@ -196,6 +203,13 @@ export function connectScroll({ story, stage, hero, artwork, header, panel }: Sc
     schedule();
   }
 
+  function resize() {
+    const width = window.innerWidth;
+    if (mobileTouch.matches && width === previousWidth) return;
+    previousWidth = width;
+    refresh();
+  }
+
   function ready() {
     imageReady = artwork.naturalWidth > 0;
     geometryChanged = true;
@@ -203,7 +217,7 @@ export function connectScroll({ story, stage, hero, artwork, header, panel }: Sc
   }
 
   window.addEventListener("scroll", schedule, { passive: true });
-  window.addEventListener("resize", refresh, { passive: true });
+  window.addEventListener("resize", resize, { passive: true });
   window.addEventListener("pageshow", refresh);
   motion.addEventListener("change", refresh);
   artwork.addEventListener("load", ready);
@@ -214,7 +228,7 @@ export function connectScroll({ story, stage, hero, artwork, header, panel }: Sc
   return () => {
     window.cancelAnimationFrame(frame);
     window.removeEventListener("scroll", schedule);
-    window.removeEventListener("resize", refresh);
+    window.removeEventListener("resize", resize);
     window.removeEventListener("pageshow", refresh);
     motion.removeEventListener("change", refresh);
     artwork.removeEventListener("load", ready);
@@ -223,6 +237,8 @@ export function connectScroll({ story, stage, hero, artwork, header, panel }: Sc
     story.removeAttribute("data-art-arriving");
     story.removeAttribute("data-panel-arriving");
     story.removeAttribute("data-panel-filled");
+    story.removeAttribute("data-panel-entered");
+    panel.style.removeProperty("--panel-mobile-gap-factor");
     header.removeAttribute("data-active");
     header.inert = true;
     hero.inert = false;
