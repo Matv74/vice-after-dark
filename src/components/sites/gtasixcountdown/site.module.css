@@ -73,9 +73,32 @@
   text-align: center;
 }
 
+.brand {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
 .logo {
   width: auto;
-  height: 100px;
+  height: clamp(60px, 12vw, 88px);
+  margin-bottom: 4px;
+}
+
+.brandTitle {
+  margin: 0;
+  color: #fff4ee;
+  font: 400 clamp(1.5rem, 4vw, 2rem) / 1 var(--gta-heading), sans-serif;
+  letter-spacing: .1em;
+}
+
+.brandTagline {
+  margin: 0;
+  color: #ffd6e5;
+  font-size: clamp(.8125rem, 2.5vw, .9375rem);
+  line-height: 1.4;
+  text-wrap: balance;
 }
 
 .control {

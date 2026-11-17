@@ -1,4 +1,5 @@
 export const SITE_NAME = "VI";
+export const SITE_TITLE = "GTA VI Countdown to your first night in Vice City";
 
 export const SCREEN_TWO_ART = "/sites/vice-signal/screen-two-1.webp";
 

@@ -170,8 +170,11 @@ function CountdownPage() {
       </div>
       <div className={styles.overlay} aria-hidden="true" />
       <main className={styles.content}>
-        <h1 className="sr-only">GTA VI Countdown Timer | Days Until Grand Theft Auto 6 Release Date</h1>
-        <Image className={styles.logo} src={assetRoot + "/logo.png"} alt="Grand Theft Auto VI Official Logo" width={960} height={729} priority unoptimized />
+        <div className={styles.brand}>
+          <Image className={styles.logo} src={assetRoot + "/icon.webp"} alt="" width={1200} height={848} preload unoptimized />
+          <h1 className={styles.brandTitle}>GTA VI</h1>
+          <p className={styles.brandTagline}>Countdown to your first night in Vice City</p>
+        </div>
         <Countdown effects={settings.showDailyEffects} />
       </main>
 

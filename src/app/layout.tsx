@@ -1,6 +1,18 @@
+import type { Metadata } from "next";
 import "./globals.css";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { DEFAULT_LEGAL_LOCALE } from "@/config/legal";
+import { SITE_TITLE } from "@/components/sites/vice-signal/config";
+
+export const metadata: Metadata = {
+  title: SITE_TITLE,
+  openGraph: {
+    title: SITE_TITLE,
+  },
+  twitter: {
+    title: SITE_TITLE,
+  },
+};
 
 export default function RootLayout({
   children,

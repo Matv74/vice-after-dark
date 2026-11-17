@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTA 6 Intro Animation Demo</title>
+  <link rel="stylesheet" href="./gta6-intro.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+    }
+    .hero {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1b1226 0%, #050508 100%);
+    }
+    .main-site-content {
+      text-align: center;
+      z-index: 1;
+      padding: 24px;
+    }
+    .main-site-content h1 {
+      font-size: clamp(2rem, 5vw, 4.5rem);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #f5b26b, #ef8d63, #ee7fae);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .main-site-content p {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.2em;
+    }
+    .replay-btn {
+      margin-top: 32px;
+      padding: 12px 28px;
+      background: #ffffff;
+      color: #000;
+      border: none;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .replay-btn:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <!-- Main page content (revealed behind/after intro animation) -->
+    <div class="main-site-content">
+      <h1>Grand Theft Auto VI</h1>
+      <p>WELCOME TO LEONIDA</p>
+      <button class="replay-btn" onclick="replayAnimation()">REPLAY INTRO</button>
+    </div>
+
+    <!-- GTA 6 Intro Animation Overlay -->
+    <div id="intro-container" class="gta6-intro-container" aria-hidden="true">
+      <div class="gta6-collage">
+        <!-- Desktop Shards (hidden on mobile via CSS) -->
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: -46vw; --ty: -38vh; --rot: -28deg; --d: 0.00s;" src="./assets/desktop/shard0.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: 44vw; --ty: -42vh; --rot: 22deg; --d: 0.09s;" src="./assets/desktop/shard1.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: -52vw; --ty: 10vh; --rot: 18deg; --d: 0.18s;" src="./assets/desktop/shard2.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: 48vw; --ty: 18vh; --rot: -20deg; --d: 0.27s;" src="./assets/desktop/shard3.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: -38vw; --ty: 44vh; --rot: 26deg; --d: 0.36s;" src="./assets/desktop/shard4.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: 36vw; --ty: -30vh; --rot: -16deg; --d: 0.45s;" src="./assets/desktop/shard5.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: -30vw; --ty: -48vh; --rot: 14deg; --d: 0.54s;" src="./assets/desktop/shard6.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: 30vw; --ty: 46vh; --rot: -24deg; --d: 0.63s;" src="./assets/desktop/shard7.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: -55vw; --ty: -8vh; --rot: 12deg; --d: 0.72s;" src="./assets/desktop/shard8.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-desktop" style="--tx: 55vw; --ty: 6vh; --rot: -14deg; --d: 0.81s;" src="./assets/desktop/shard9.png" alt="" loading="eager">
+
+        <!-- Mobile Shards (visible on mobile only via CSS) -->
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: -46vw; --ty: -38vh; --rot: -28deg; --d: 0.00s;" src="./assets/mobile/shard0.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: 44vw; --ty: -42vh; --rot: 22deg; --d: 0.09s;" src="./assets/mobile/shard1.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: -52vw; --ty: 10vh; --rot: 18deg; --d: 0.18s;" src="./assets/mobile/shard2.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: 48vw; --ty: 18vh; --rot: -20deg; --d: 0.27s;" src="./assets/mobile/shard3.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: -38vw; --ty: 44vh; --rot: 26deg; --d: 0.36s;" src="./assets/mobile/shard4.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: 36vw; --ty: -30vh; --rot: -16deg; --d: 0.45s;" src="./assets/mobile/shard5.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: -30vw; --ty: -48vh; --rot: 14deg; --d: 0.54s;" src="./assets/mobile/shard6.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: 30vw; --ty: 46vh; --rot: -24deg; --d: 0.63s;" src="./assets/mobile/shard7.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: -55vw; --ty: -8vh; --rot: 12deg; --d: 0.72s;" src="./assets/mobile/shard8.png" alt="" loading="eager">
+        <img class="gta6-shard gta6-shard-mobile" style="--tx: 55vw; --ty: 6vh; --rot: -14deg; --d: 0.81s;" src="./assets/mobile/shard9.png" alt="" loading="eager">
+
+        <!-- Assembled Cover & Logo -->
+        <div class="gta6-assembled-cover">
+          <picture>
+            <source media="(max-width: 767px)" srcset="./assets/mobile/poster_full.jpg">
+            <source media="(min-width: 768px)" srcset="./assets/desktop/poster_full.jpg">
+            <img class="gta6-cover-img" src="./assets/desktop/poster_full.jpg" alt="GTA 6 Cover Art" loading="eager">
+          </picture>
+          <picture>
+            <source media="(max-width: 767px)" srcset="./assets/mobile/poster_logo.png">
+            <source media="(min-width: 768px)" srcset="./assets/desktop/poster_logo.png">
+            <img class="gta6-logo-img" src="./assets/desktop/poster_logo.png" alt="GTA 6 Logo" loading="eager">
+          </picture>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function replayAnimation() {
+      const el = document.getElementById("intro-container");
+      const clone = el.cloneNode(true);
+      el.parentNode.replaceChild(clone, el);
+    }
+  </script>
+</body>
+</html>
