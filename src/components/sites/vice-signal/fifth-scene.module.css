@@ -1,0 +1,137 @@
+.scene {
+  position: relative;
+  padding-block: clamp(44px, 7vw, 104px);
+  background: linear-gradient(180deg, var(--screen3-bg, #161628), #171124 54%, #0b0d1a);
+  color: #fff8e9;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+[data-pinned] > .entry { margin-block-start: -100lvh; }
+
+[data-pinned] > .entry .scene {
+  transform: translate3d(0, var(--scene-five-shift, 0px), 0);
+  background: linear-gradient(180deg, var(--screen3-bg) 100lvh, #171124 75%, #0b0d1a);
+}
+
+[data-pinned] > .entry:not([data-scene-five-active]) .scene { visibility: hidden; }
+[data-pinned] > .entry:not([data-scene-five-filled]) .scene { background: transparent; }
+
+.cards {
+  display: grid;
+  width: min(1108px, calc(100% - 32px));
+  margin-inline: auto;
+  gap: clamp(20px, 2.5vw, 36px);
+}
+
+.card {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  border: 1px solid #f3c1e224;
+  border-radius: clamp(16px, 2vw, 28px);
+  background: #1b1729;
+}
+
+.art {
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: clip;
+}
+
+.art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .45s ease-out;
+}
+
+.content {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: clamp(22px, 4vw, 54px);
+}
+
+.category {
+  color: #ffb1c9;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.content h2 {
+  max-width: 13ch;
+  font: 700 clamp(1.9rem, 4vw, 3.65rem) / 1.03 Oswald, "Arial Narrow", sans-serif;
+  text-wrap: balance;
+  text-transform: uppercase;
+}
+
+.description {
+  max-width: 35ch;
+  color: #fff8e9e0;
+  font-size: clamp(.94rem, 1.4vw, 1.12rem);
+  line-height: 1.5;
+}
+
+.action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  margin-block-start: 4px;
+  padding-inline: 16px;
+  border-radius: 999px;
+  background: #fff3c4;
+  color: #191422;
+  font-size: .9rem;
+  font-weight: 700;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+.action[data-accent="pink"], .action:hover { background: #ffb1c9; }
+.action:hover { transform: translateY(-2px); }
+.action:focus-visible { outline: 2px solid #ffb1c9; outline-offset: 4px; }
+
+@media (max-width: 767px) {
+  .card:first-child .art { aspect-ratio: 1; }
+  .card:first-child .art img { object-position: center top; }
+}
+
+@media (min-width: 768px) {
+  .card {
+    display: grid;
+    min-height: clamp(300px, 32vw, 430px);
+    align-items: center;
+    --shade-direction: to right;
+  }
+
+  .card[data-promo="true"] { min-height: clamp(340px, 39vw, 510px); }
+  .card[data-align="right"] { --shade-direction: to left; }
+
+  .art {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    aspect-ratio: auto;
+  }
+
+  .card::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: linear-gradient(var(--shade-direction), #110e1dee, #110e1d91 43%, #110e1d00 78%);
+    content: "";
+  }
+
+  .content { width: 52%; }
+  .card[data-align="right"] .content { justify-self: end; }
+  .card:focus-within .art img, .card:hover .art img { transform: scale(1.025); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art img, .action { transition: none; }
+  .card:focus-within .art img, .card:hover .art img, .action:hover { transform: none; }
+}

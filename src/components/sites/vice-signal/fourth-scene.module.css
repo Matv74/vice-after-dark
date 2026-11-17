@@ -1,0 +1,83 @@
+.scene {
+  position: relative;
+  block-size: min(100svh, 110vw);
+}
+
+.revealRange {
+  display: none;
+  position: absolute;
+  inset-block-start: 0;
+  block-size: var(--scene-four-reveal-length);
+  pointer-events: none;
+}
+
+[data-pinned] > .scene .revealRange { display: block; }
+
+.frame {
+  position: relative;
+  display: grid;
+  block-size: 100%;
+  place-items: center;
+  overflow: clip;
+  background: var(--screen3-bg);
+}
+
+.posterFrame {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.poster {
+  object-fit: cover;
+  object-position: center top;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  visibility: hidden;
+}
+
+[data-pinned] > .scene .canvas[data-frame-index] { visibility: inherit; }
+
+[data-pinned] > .scene {
+  margin-block-start: calc(-1 * var(--scene-four-reveal-length));
+  block-size: calc(var(--scene-four-reveal-length) + var(--scene-four-extra-scroll) + 100lvh
+    + var(--scene-five-panel-length) - min(var(--scene-four-reveal-length), var(--scene-five-overlap)));
+}
+
+[data-pinned] > .scene .frame {
+  position: sticky;
+  inset-block-start: 0;
+  block-size: 100lvh;
+  visibility: hidden;
+}
+
+[data-pinned] > .scene[data-scene-four-active] .frame { visibility: visible; }
+
+[data-pinned] > .scene .frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--screen3-bg);
+  opacity: calc(1 - (1 - var(--scene-four-shade, 1)) * (1 - var(--scene-five-shade, 0)));
+  pointer-events: none;
+}
+
+@media (max-aspect-ratio: 10/11) {
+  [data-pinned] > .scene .frame::before {
+    content: "";
+    position: absolute;
+    inset: -32px;
+    background: var(--scene-four-ambient) center / cover;
+    filter: blur(24px);
+  }
+
+  [data-pinned] > .scene .posterFrame {
+    block-size: min(100svh, 110vw);
+    mask-image: linear-gradient(transparent, #000 7%, #000 93%, transparent);
+  }
+}

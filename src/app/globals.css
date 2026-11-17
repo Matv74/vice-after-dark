@@ -128,3 +128,27 @@
     @apply font-sans;
   }
 }
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/sites/gtasixcountdown/fonts/inter.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Bebas Neue";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/sites/gtasixcountdown/fonts/bebas-neue.woff2") format("woff2");
+}
+
+html[data-countdown-widget] {
+  background: transparent;
+  --gta-heading: "Bebas Neue";
+}
+
+html[data-countdown-widget] body {
+  background: transparent;
+}
