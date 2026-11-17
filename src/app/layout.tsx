@@ -3,9 +3,10 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { LegalFooter } from "@/components/legal/LegalFooter";
 import { DEFAULT_LEGAL_LOCALE } from "@/config/legal";
-import { SITE_TITLE } from "@/components/sites/vice-signal/config";
+import { SITE_TITLE, SITE_URL } from "@/components/sites/vice-signal/config";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   openGraph: {
     title: SITE_TITLE,

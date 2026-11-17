@@ -13,7 +13,12 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { section } = await params;
   const card = sections.find(({ id }) => id === section);
-  return { title: card ? card.title + " | " + SITE_NAME : SITE_NAME };
+  return {
+    title: card ? card.title + " | " + SITE_NAME : SITE_NAME,
+    alternates: {
+      canonical: `/sections/${section}`,
+    },
+  };
 }
 
 export default async function SectionPage({ params }: PageProps) {

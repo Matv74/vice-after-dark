@@ -1,4 +1,5 @@
 // TODO: legal review
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { legalCopy } from "@/components/legal/legal-copy";
 import styles from "@/components/legal/legal.module.css";
@@ -6,6 +7,22 @@ import { CONTACT_EMAIL, isLegalDocument, isLegalLocale, LEGAL_DOCUMENTS, LEGAL_L
 
 export function generateStaticParams() {
   return LEGAL_LOCALES.flatMap(locale => LEGAL_DOCUMENTS.map(document => ({ locale, document })));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; document: string }>;
+}): Promise<Metadata> {
+  const { locale, document } = await params;
+  if (!isLegalLocale(locale) || !isLegalDocument(document)) return {};
+  const copy = legalCopy[locale];
+  return {
+    title: copy.titles[document],
+    alternates: {
+      canonical: `/${locale}/${document}`,
+    },
+  };
 }
 
 export default async function LegalPage({ params }: { params: Promise<{ locale: string; document: string }> }) {
