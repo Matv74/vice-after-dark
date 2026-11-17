@@ -6,6 +6,9 @@ import { landingCopy } from "./landing-copy";
 import { COUNTDOWN_ALTERNATES, COUNTDOWN_PATHS, type LandingLocale } from "./landing-routes";
 import styles from "./release-guide.module.css";
 
+const releaseScheduleUrl =
+  "https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s";
+
 export function landingMetadata(locale: LandingLocale): Metadata {
   const { title, description } = landingCopy[locale];
   return {
@@ -22,11 +25,11 @@ export function LocalizedLanding({ locale }: { locale: LandingLocale }) {
     <main className={styles.guide}>
       <div className={styles.inner}>
         <a href={COUNTDOWN_PATHS.en} hrefLang="en">{copy.home}</a>
-        <h1 className={styles.landingTitle}>{copy.title}</h1>
+        <h1 className={styles.landingTitle}>{copy.heading}</h1>
         <Countdown effects={false} copy={copy.timer} />
         <h2>{copy.guide}</h2>
         {copy.intro.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
-        <p>{copy.note}</p>
+        <p>{copy.note} <a href={releaseScheduleUrl}>{copy.source}</a></p>
         <LocalizedReleaseTable locale={locale} />
         <h3>{copy.faqTitle}</h3>
         <dl>

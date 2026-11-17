@@ -14,6 +14,12 @@ const [featured, ...portraitCards] = sections;
 const primaryCards = portraitCards.slice(0, 3);
 const extraCards = portraitCards.slice(3);
 
+function trailerUrl(card: SectionCard) {
+  return card.videoId && /^[\w-]{11}$/.test(card.videoId)
+    ? `https://www.youtube.com/watch?v=${card.videoId}`
+    : undefined;
+}
+
 function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | null> }) {
   const menu = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
@@ -54,11 +60,21 @@ function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | n
         </div>
         <nav aria-label="Site sections">
           <a href="#countdown" onClick={() => menu.current?.close()}>Release countdown</a>
-          {sections.map((section) => (
-            <a key={section.id} href={section.href} onClick={() => menu.current?.close()}>
-              {section.title}<ArrowUpRight aria-hidden="true" />
-            </a>
-          ))}
+          {sections.map((section) => {
+            const videoUrl = trailerUrl(section);
+
+            return (
+              <a
+                key={section.id}
+                href={videoUrl ?? section.href}
+                target={videoUrl ? "_blank" : undefined}
+                rel={videoUrl ? "noopener noreferrer" : undefined}
+                onClick={() => menu.current?.close()}
+              >
+                {section.title}<ArrowUpRight aria-hidden="true" />
+              </a>
+            );
+          })}
         </nav>
       </dialog>
     </>
@@ -66,9 +82,7 @@ function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | n
 }
 
 function Card({ card, featured }: { card: SectionCard; featured?: boolean }) {
-  const videoUrl = card.videoId && /^[\w-]{11}$/.test(card.videoId)
-    ? `https://www.youtube.com/watch?v=${card.videoId}`
-    : undefined;
+  const videoUrl = trailerUrl(card);
 
   return (
     <div className={styles.cardSlot}>
