@@ -6,6 +6,9 @@ import { HOME_LANGUAGE, SITE_TITLE, SITE_URL } from "@/components/sites/vice-sig
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
+  icons: {
+    icon: { url: "/favicon.png", type: "image/png", sizes: "96x96" },
+  },
   openGraph: {
     title: SITE_TITLE,
   },
