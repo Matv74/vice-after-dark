@@ -1,28 +1,109 @@
 "use client";
 
 import Image from "next/image";
-import { type CSSProperties, useEffect, useSyncExternalStore } from "react";
+import { type CSSProperties, useEffect, useMemo, useSyncExternalStore } from "react";
+import { HOME_LANGUAGE, RELEASE_LISTINGS_NOTE, RELEASE_REGION_KEY, RELEASE_WINDOWS, remainingReleaseSeconds, resolveReleaseWindow } from "../vice-signal/config";
 import { assetRoot, coverArt, widgetBackgrounds } from "./assets";
+import { CustomizeSelect } from "./CustomizeSelect";
 import styles from "./countdown.module.css";
+import siteStyles from "./site.module.css";
 
-const releaseDate = new Date(2026, 10, 19).getTime();
 const hour = 3600;
 const day = 24 * hour;
+const regionOptions = [
+  { value: "", label: "Auto" },
+  ...RELEASE_WINDOWS.map(window => ({ value: window.id, label: window.labels[HOME_LANGUAGE] })),
+];
+const regionChange = "gta-release-region-change";
+let unsavedChoice: string | null | undefined;
+let regionRequested = false;
+let regionInfo: { country?: string; clockOffset: number } | null = null;
 
 function subscribeToClock(notify: () => void) {
-  const interval = window.setInterval(notify, 200);
-  window.addEventListener("visibilitychange", notify);
+  const interval = window.setInterval(notify, 1000);
+  document.addEventListener("visibilitychange", notify);
   return () => {
     window.clearInterval(interval);
-    window.removeEventListener("visibilitychange", notify);
+    document.removeEventListener("visibilitychange", notify);
   };
 }
 
-const secondsLeft = () => Math.max(0, Math.round((releaseDate - Date.now()) / 1000));
-const getServerTime = () => null;
+const clockSnapshot = () => Math.floor(Date.now() / 1000) * 1000;
+const neutralSnapshot = () => null;
+const readRegionInfo = () => regionInfo;
+
+function subscribeToRegion(notify: () => void) {
+  window.addEventListener(regionChange, notify);
+  window.addEventListener("storage", notify);
+  return () => {
+    window.removeEventListener(regionChange, notify);
+    window.removeEventListener("storage", notify);
+  };
+}
+
+function readRegion() {
+  if (unsavedChoice !== undefined) return unsavedChoice;
+  try {
+    return window.localStorage.getItem(RELEASE_REGION_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveRegion(choice: string) {
+  try {
+    if (choice) window.localStorage.setItem(RELEASE_REGION_KEY, choice);
+    else window.localStorage.removeItem(RELEASE_REGION_KEY);
+    unsavedChoice = undefined;
+  } catch {
+    unsavedChoice = choice || null;
+  }
+  window.dispatchEvent(new Event(regionChange));
+}
+
+async function requestRegion() {
+  if (regionRequested) return;
+  regionRequested = true;
+
+  try {
+    const startedAt = Date.now();
+    const response = await fetch("/api/region", { cache: "no-store" });
+    const receivedAt = Date.now();
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const serverTime = Date.parse(response.headers.get("Date") ?? "");
+    regionInfo = {
+      country: typeof data?.country === "string" ? data.country : undefined,
+      clockOffset: Number.isFinite(serverTime) ? serverTime - (startedAt + receivedAt) / 2 : 0,
+    };
+    window.dispatchEvent(new Event(regionChange));
+  } catch {
+    // The browser timezone and clock are sufficient when the endpoint is unavailable.
+  }
+}
+
+export function useReleaseRegion() {
+  const ready = useSyncExternalStore(subscribeToRegion, () => true, () => false);
+  const choice = useSyncExternalStore(subscribeToRegion, readRegion, neutralSnapshot);
+  const info = useSyncExternalStore(subscribeToRegion, readRegionInfo, neutralSnapshot);
+  useEffect(() => {
+    if (ready && !choice && !readRegion()) void requestRegion();
+  }, [choice, ready]);
+
+  const countryHint = info?.country;
+  const release = useMemo(() => ready
+    ? resolveReleaseWindow(choice, countryHint, Intl.DateTimeFormat().resolvedOptions().timeZone)
+    : null, [choice, countryHint, ready]);
+  return { choice, release, clockOffset: info?.clockOffset ?? 0 };
+}
 
 function useCountdown() {
-  const left = useSyncExternalStore(subscribeToClock, secondsLeft, getServerTime);
+  const now = useSyncExternalStore(subscribeToClock, clockSnapshot, neutralSnapshot);
+  const { release, clockOffset } = useReleaseRegion();
+  const left = release && now !== null
+    ? remainingReleaseSeconds(release.unlockAt, now + clockOffset)
+    : null;
   const remaining = left ?? 0;
 
   return {
@@ -53,16 +134,16 @@ function midnightPhase(remaining: number | null) {
   return "";
 }
 
-export function Countdown({ effects }: { effects: boolean }) {
+const englishTimer = { out: "Out Now", label: "Time until GTA VI release", units: ["Days", "Hours", "Minutes", "Seconds"] };
+
+export function Countdown({ effects, copy = englishTimer }: { effects: boolean; copy?: { out: string; label: string; units: readonly string[] } }) {
   const { remaining, units } = useCountdown();
   const [days] = units;
   const [primary, secondary] = palettes[days % palettes.length];
   const particleCount = days <= 3 ? 22 : days <= 7 ? 16 : days <= 14 ? 12 : days <= 30 ? 8 : 5;
   const phase = effects ? midnightPhase(remaining) : "";
 
-  if (remaining === 0) return <p className={styles.released}>Out Now</p>;
-
-  return (
+  return remaining === 0 ? <p className={styles.released}>{copy.out}</p> : (
     <div
       className={[styles.stage, effects && styles.effects, effects && days <= 3 && styles.critical, phase].filter(Boolean).join(" ")}
       style={{ "--primary": primary, "--secondary": secondary } as CSSProperties}
@@ -82,8 +163,8 @@ export function Countdown({ effects }: { effects: boolean }) {
         </div>
       )}
       {phase && <div className={styles.midnightFlash} aria-hidden="true" />}
-      <div className={styles.countdown} role="timer" aria-label="Time until GTA VI release">
-        {["Days", "Hours", "Minutes", "Seconds"].map((label, index) => (
+      <div className={styles.countdown} role="timer" aria-label={copy.label}>
+        {copy.units.map((label, index) => (
           <div className={styles.card} key={label} style={{ "--index": index } as CSSProperties}>
             <span className={styles.digit} key={index === 3 && !phase ? label : units[index]}>
               {remaining === null ? "–" : units[index]}
@@ -93,6 +174,22 @@ export function Countdown({ effects }: { effects: boolean }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+export function ReleaseRegionSettings() {
+  const { choice, release } = useReleaseRegion();
+  const selected = RELEASE_WINDOWS.some(window => window.id === choice) ? choice ?? "" : "";
+
+  return (
+    <div className={siteStyles.releaseRegion}>
+      <CustomizeSelect label="Release region" value={selected} options={regionOptions}
+        onChange={saveRegion} describedBy="gta-release-region-note" />
+      {release?.approximate && <p>Approximate · midnight on 19 November, local time</p>}
+      {!selected && release?.window && <p>Auto · {release.window.labels[HOME_LANGUAGE]}</p>}
+      <p id="gta-release-region-note">{RELEASE_LISTINGS_NOTE}</p>
+      <p>Xbox uses the same windows, unconfirmed.</p>
     </div>
   );
 }

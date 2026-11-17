@@ -147,7 +147,7 @@ export function NewsFeed({ open }: { open: boolean }) {
       {failed && (
         <p className={styles.error} role="status">Failed to load news. Please try again later.</p>
       )}
-      {!failed && items.length === 0 && (
+      {open && !failed && items.length === 0 && (
         <p className={styles.message} role="status">
           {loading || !updated ? "Loading news..." : "No news available at the moment."}
         </p>

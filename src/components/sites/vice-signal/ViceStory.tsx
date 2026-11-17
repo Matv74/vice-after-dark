@@ -26,13 +26,13 @@ function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | n
   return (
     <>
       <header ref={headerRef} className={styles.header} inert>
-        <a className={styles.brand} href="#countdown" aria-label={SITE_NAME + " — " + uk.home}>
+        <a className={styles.brand} href="#countdown" aria-label={SITE_NAME + " — Home"}>
           {SITE_NAME}
         </a>
         <div className={styles.headerActions}>
           <button
             className={styles.iconButton}
-            type="button" aria-label={uk.openMenu} aria-haspopup="dialog"
+            type="button" aria-label="Open menu" aria-haspopup="dialog"
             aria-expanded={open} aria-controls="vice-menu" onClick={openMenu}
           >
             <Menu aria-hidden="true" />
@@ -40,20 +40,20 @@ function StoryHeader({ headerRef }: { headerRef: React.RefObject<HTMLElement | n
         </div>
       </header>
       <dialog
-        ref={menu} id="vice-menu" className={styles.menu} aria-label={uk.sections}
+        ref={menu} id="vice-menu" className={styles.menu} aria-label="Site sections"
         onClose={() => setOpen(false)}
       >
         <div className={styles.menuHeader}>
           <a className={styles.brand} href="#countdown" onClick={() => menu.current?.close()}>{SITE_NAME}</a>
           <button
-            className={styles.iconButton} type="button" aria-label={uk.closeMenu}
+            className={styles.iconButton} type="button" aria-label="Close menu"
             onClick={() => menu.current?.close()}
           >
             <X aria-hidden="true" />
           </button>
         </div>
-        <nav aria-label={uk.sections}>
-          <a href="#countdown" onClick={() => menu.current?.close()}>{uk.countdown}</a>
+        <nav aria-label="Site sections">
+          <a href="#countdown" onClick={() => menu.current?.close()}>Release countdown</a>
           {sections.map((section) => (
             <a key={section.id} href={section.href} onClick={() => menu.current?.close()}>
               {section.title}<ArrowUpRight aria-hidden="true" />
@@ -148,10 +148,10 @@ export function ViceStory({ children }: { children: ReactNode }) {
           {children}
           <div className={styles.heroShade} aria-hidden="true" />
         </div>
-        <div className={styles.artFrame} lang="uk">
+        <div className={styles.artFrame}>
           <div className={styles.artScene}>
             <Image
-              ref={artwork} src={SCREEN_TWO_ART} alt={uk.artworkAlt} fill
+              ref={artwork} src={SCREEN_TWO_ART} alt="Lucia and Jason next to a car at sunset in Vice City" fill
               sizes="100vw" unoptimized preload decoding="async"
               className={styles.artwork}
             />
@@ -160,11 +160,11 @@ export function ViceStory({ children }: { children: ReactNode }) {
         </div>
       </div>
       <div className={styles.runway} aria-hidden="true" />
-      <div className={styles.ukrainian} lang="uk" id="sections">
+      <div className={styles.ukrainian} id="sections">
         <StoryHeader headerRef={header} />
         <section ref={panel} className={styles.panel} id="vice-panel" aria-labelledby="vice-sections-heading">
           <div className={styles.column}>
-            <h2 className="sr-only" id="vice-sections-heading">{uk.sections}</h2>
+            <h2 className="sr-only" id="vice-sections-heading">Trailers</h2>
             <Card card={featured} featured />
             <div className={styles.primaryCards}>
               {primaryCards.map((card) => <Card key={card.id} card={card} />)}

@@ -1,20 +1,17 @@
 import type { MetadataRoute } from "next";
-import { sections, SITE_URL } from "@/components/sites/vice-signal/config";
+import { SITE_URL } from "@/components/sites/vice-signal/config";
 import { LEGAL_DOCUMENTS, LEGAL_LOCALES } from "@/config/legal";
+import { COUNTDOWN_ALTERNATES, COUNTDOWN_PATHS } from "@/components/sites/gtasixcountdown/landing-routes";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const home: MetadataRoute.Sitemap = [
-    {
-      url: `${SITE_URL}/`,
-      changeFrequency: "daily",
-      priority: 1.0,
-    },
-  ];
-
-  const sectionEntries: MetadataRoute.Sitemap = sections.map(({ id }) => ({
-    url: `${SITE_URL}/sections/${id}`,
-    changeFrequency: "weekly",
-    priority: 0.8,
+  const languages = Object.fromEntries(
+    Object.entries(COUNTDOWN_ALTERNATES).map(([locale, path]) => [locale, new URL(path, SITE_URL).href]),
+  );
+  const countdownPages: MetadataRoute.Sitemap = Object.values(COUNTDOWN_PATHS).map(path => ({
+    url: new URL(path, SITE_URL).href,
+    changeFrequency: "daily",
+    priority: path === "/" ? 1 : 0.9,
+    alternates: { languages },
   }));
 
   const legalEntries: MetadataRoute.Sitemap = LEGAL_LOCALES.flatMap(locale =>
@@ -25,5 +22,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   );
 
-  return [...home, ...sectionEntries, ...legalEntries];
+  return [...countdownPages, ...legalEntries];
 }

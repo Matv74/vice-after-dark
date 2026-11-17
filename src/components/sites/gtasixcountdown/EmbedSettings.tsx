@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { SITE_URL } from "../vice-signal/config";
 import { widgetBackgrounds } from "./assets";
 import styles from "./site.module.css";
 
@@ -23,7 +24,8 @@ export function EmbedSettings() {
   const code = expanded
     ? '<iframe src="' + window.location.origin + window.location.pathname + hash +
       '" width="' + width + '" height="' + height +
-      '" frameborder="0" style="border:none; overflow:hidden;" scrolling="no"></iframe>'
+      '" title="GTA 6 Countdown" frameborder="0" style="border:none; overflow:hidden;" scrolling="no"></iframe>' +
+      '\n<p><a href="' + SITE_URL + '/">GTA 6 Countdown</a></p>'
     : "";
 
   function updatePreset(value: string) {

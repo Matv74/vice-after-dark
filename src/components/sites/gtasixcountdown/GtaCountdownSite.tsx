@@ -5,7 +5,8 @@ import Image from "next/image";
 import { ChevronUp, Newspaper, Settings } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { assetRoot, backgroundFiles, backgrounds, coverArt, stillBackgrounds } from "./assets";
-import { Countdown, CountdownWidget } from "./Countdown";
+import { Countdown, CountdownWidget, ReleaseRegionSettings } from "./Countdown";
+import { CustomizeSelect } from "./CustomizeSelect";
 import { EmbedSettings } from "./EmbedSettings";
 import { MusicPlayer } from "./MusicPlayer";
 import { NewsFeed } from "./NewsFeed";
@@ -84,6 +85,7 @@ const toggles = [
 ] as const;
 
 const optimizedCoverPath = assetRoot + "/backgrounds/Official_Cover_Art_landscape-optimized.webp";
+const backgroundOptions = backgrounds.map(([label, value]) => ({ label, value }));
 
 function BackgroundMedia({ file, fading }: { file: Preferences["background"]; fading?: boolean }) {
   const path = file === coverArt ? optimizedCoverPath : assetRoot + "/backgrounds/" + file;
@@ -149,7 +151,10 @@ function CountdownPage() {
 
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setPanel(null);
+      if (event.key === "Escape" && !event.defaultPrevented &&
+        !(event.target instanceof Element && event.target.closest("[data-customize-options], [data-popup-open][role=combobox]"))) {
+        setPanel(null);
+      }
     };
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
@@ -210,13 +215,15 @@ function CountdownPage() {
         inert={panel !== "customize"} id="gta-customization" aria-labelledby="gta-customize-title"
       >
         <h2 id="gta-customize-title">Customize</h2>
-        <label className={styles.backgroundPicker} htmlFor="gta-background">Background:</label>
-        <select id="gta-background" value={settings.background} onChange={(event) => {
-          const file = backgroundFiles.find((value) => value === event.target.value);
-          if (file) changeBackground(file);
-        }}>
-          {backgrounds.map(([label, file]) => <option key={file} value={file}>{label}</option>)}
-        </select>
+        {panel === "customize" && <>
+        <ReleaseRegionSettings />
+        <div className={styles.backgroundSetting}>
+          <CustomizeSelect label="Background" value={settings.background} options={backgroundOptions}
+            onChange={(next) => {
+              const file = backgroundFiles.find((value) => value === next);
+              if (file) changeBackground(file);
+            }} />
+        </div>
         {toggles.map(([label, key]) => (
           <label className={styles.checkbox} key={key}>
             <input type="checkbox" checked={settings[key]} onChange={(event) => saveSettings({ [key]: event.target.checked })} />
@@ -225,6 +232,7 @@ function CountdownPage() {
           </label>
         ))}
         <EmbedSettings />
+        </>}
       </section>
 
       {settings.showFooterToggle && (

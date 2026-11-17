@@ -1,6 +1,12 @@
 // TODO: legal review
 import { ADS_ENABLED, ANALYTICS_PROVIDER, CONTACT_EMAIL, FORUM_ENABLED, FORUM_MINIMUM_AGE } from "@/config/legal";
-import { SITE_NAME } from "@/components/sites/vice-signal/config";
+import { RELEASE_REGION_KEY, SITE_NAME } from "@/components/sites/vice-signal/config";
+
+const releaseRegionNotice = {
+  uk: ["Регіон релізу", "Для режиму Auto Vercel визначає країну за IP-адресою й передає код країни в заголовку запиту. Сайт використовує його лише для вибору часу розблокування й не зберігає в cookie, localStorage або базі даних."],
+  en: ["Release region", "In Auto mode, Vercel derives the country from your IP address and sends its country code in a request header. The site uses it only to choose the unlock time and does not save it in cookies, localStorage or a database."],
+  pl: ["Region premiery", "W trybie Auto Vercel określa kraj na podstawie adresu IP i przekazuje jego kod w nagłówku żądania. Witryna używa go wyłącznie do wyboru godziny odblokowania i nie zapisuje go w plikach cookie, localStorage ani w bazie danych."],
+};
 
 export const legalCopy = {
   uk: {
@@ -15,9 +21,11 @@ export const legalCopy = {
     storageRows: [
       ["gta-countdown-preferences", "localStorage", "Вибраний фон і налаштування інтерфейсу.", "До видалення через налаштування браузера."],
       ["gta_album_volume", "localStorage", "Збереження вибраної гучності.", "До видалення через налаштування браузера."],
+      [RELEASE_REGION_KEY, "localStorage", "Збереження обраного вручну регіону відліку.", "До вибору «Auto» або очищення даних браузера."],
       ...(FORUM_ENABLED ? [["[TODO: ключі форуму]", "[TODO: тип і домен]", "[TODO: сесія входу, безпека та налаштування]", "[TODO: фактичні строки]"]] : []),
     ],
     privacy: [
+      releaseRegionNotice.uk,
       ["Хто відповідає за дані", `Адміністратор даних — оператор ${SITE_NAME}. Зв’язок через ${CONTACT_EMAIL}.`],
       ["Головний сайт", "Головний сайт працює без реєстрації та форм збору даних. Vercel обробляє технічні дані запитів, зокрема IP-адресу, час, запитану сторінку й дані браузера, щоб доставляти сторінки, підтримувати безпеку й усувати збої. Строки зберігання журналів [TODO: перевірити налаштування Vercel]. Якщо ви напишете нам, обробимо вашу адресу й повідомлення, щоб відповісти. Строк зберігання листування [TODO]."],
       ...(FORUM_ENABLED ? [[
@@ -36,6 +44,7 @@ export const legalCopy = {
       ] : []),
     ],
     cookies: [
+      releaseRegionNotice.uk,
       ["Зберігання у браузері", "Головний сайт не встановлює власних cookie. Записи нижче зберігають вибрані вами налаштування. Вбудовані плеєри після завантаження можуть використовувати сховища провайдерів. Точні назви й строки залежать від провайдера, браузера та входу в обліковий запис."],
     ],
     options: [
@@ -61,9 +70,11 @@ export const legalCopy = {
     storageRows: [
       ["gta-countdown-preferences", "localStorage", "Remembers your chosen background and interface settings.", "Until cleared in your browser."],
       ["gta_album_volume", "localStorage", "Remembers your chosen volume.", "Until cleared in your browser."],
+      [RELEASE_REGION_KEY, "localStorage", "Remembers the countdown region you choose manually.", "Until you select Auto or clear your browser data."],
       ...(FORUM_ENABLED ? [["[TODO: forum keys]", "[TODO: type and domain]", "[TODO: login session, security and preferences]", "[TODO: actual retention]"]] : []),
     ],
     privacy: [
+      releaseRegionNotice.en,
       ["Who is responsible", `The controller is the operator of ${SITE_NAME}. Contact ${CONTACT_EMAIL}.`],
       ["Main site", "The main site has no registration or data collection forms. Vercel processes technical request data such as IP address, time, requested page and browser details to serve pages, maintain security and troubleshoot issues. Log retention [TODO: check Vercel settings]. If you email us, we process your address and message to reply. Email retention [TODO]."],
       ...(FORUM_ENABLED ? [[
@@ -82,6 +93,7 @@ export const legalCopy = {
       ] : []),
     ],
     cookies: [
+      releaseRegionNotice.en,
       ["Browser storage", "The main site sets no first-party cookies. The entries below remember your chosen settings. When you load an embedded player, the provider may use its own storage. Its exact keys and retention depend on the provider, browser and login state."],
     ],
     options: [
@@ -107,9 +119,11 @@ export const legalCopy = {
     storageRows: [
       ["gta-countdown-preferences", "localStorage", "Zapamiętuje wybrane tło i ustawienia interfejsu.", "Do usunięcia w przeglądarce."],
       ["gta_album_volume", "localStorage", "Zapamiętuje wybraną głośność.", "Do usunięcia w przeglądarce."],
+      [RELEASE_REGION_KEY, "localStorage", "Zapamiętuje ręcznie wybrany region odliczania.", "Do wybrania opcji Auto lub usunięcia danych przeglądarki."],
       ...(FORUM_ENABLED ? [["[TODO: klucze forum]", "[TODO: typ i domena]", "[TODO: sesja logowania, bezpieczeństwo i ustawienia]", "[TODO: rzeczywiste okresy]"]] : []),
     ],
     privacy: [
+      releaseRegionNotice.pl,
       ["Kto odpowiada za dane", `Administratorem danych jest operator ${SITE_NAME}. Kontakt przez ${CONTACT_EMAIL}.`],
       ["Strona główna", "Strona główna działa bez rejestracji i formularzy zbierających dane. Vercel przetwarza techniczne dane żądań, takie jak adres IP, czas, żądana strona i dane przeglądarki, aby dostarczać strony, zapewniać bezpieczeństwo i usuwać usterki. Okres przechowywania logów [TODO: sprawdzić ustawienia Vercel]. Gdy napiszesz do nas, użyjemy adresu i treści wiadomości, aby odpowiedzieć. Okres przechowywania korespondencji [TODO]."],
       ...(FORUM_ENABLED ? [[
@@ -128,6 +142,7 @@ export const legalCopy = {
       ] : []),
     ],
     cookies: [
+      releaseRegionNotice.pl,
       ["Pamięć przeglądarki", "Strona główna nie ustawia własnych plików cookie. Poniższe wpisy zapamiętują wybrane ustawienia. Po wczytaniu osadzonego odtwarzacza jego dostawca może używać własnej pamięci. Klucze i okresy zależą od dostawcy, przeglądarki i stanu logowania."],
     ],
     options: [

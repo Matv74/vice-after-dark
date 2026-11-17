@@ -245,7 +245,26 @@
   text-transform: uppercase;
 }
 
-.backgroundPicker { display: block; margin-bottom: 8px; font-size: 1.05rem; text-transform: uppercase; }
+.pickerLabel { margin-bottom: 8px; font-size: 1.05rem; text-transform: uppercase; }
+.backgroundSetting { margin-bottom: 22px; }
+
+.releaseRegion {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.releaseRegion p {
+  margin-top: 6px;
+  color: #ddd6e8;
+  font-size: .8rem;
+  line-height: 1.4;
+}
+
+.pickerTrigger:focus-visible {
+  outline: 2px solid var(--pink);
+  outline-offset: 2px;
+}
 
 .customization select, .customization input[type="number"] {
   color-scheme: dark;
@@ -258,7 +277,65 @@
   font: inherit;
 }
 
-.backgroundPicker + select { margin-bottom: 22px; }
+.pickerTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: #0a0a10a6;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pickerTrigger:hover, .pickerTrigger[data-popup-open] { border-color: var(--pink); }
+.pickerValue { min-width: 0; }
+.pickerIcon { flex: none; color: var(--pink); }
+.pickerTrigger[data-popup-open] .pickerIcon { transform: rotate(180deg); }
+
+.pickerPositioner {
+  z-index: 200;
+  width: var(--anchor-width);
+  max-width: var(--available-width);
+}
+
+.pickerPopup {
+  padding: 5px;
+  border: 1px solid #db9cec55;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #25203f, #141424 70%);
+  box-shadow: 0 16px 36px #070511a6;
+  color: #f8f3ff;
+}
+
+.pickerList {
+  max-height: min(19rem, calc(var(--available-height) - 12px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #a766bc #171526;
+}
+
+.pickerOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: .9375rem;
+  cursor: pointer;
+}
+
+.pickerOption[data-selected] { color: #ffb9e6; }
+.pickerOption[data-highlighted] { background: #b15cba3d; }
+.pickerOption svg { flex: none; }
 
 .checkbox {
   position: relative;
@@ -405,8 +482,8 @@
   .newsOpen { left: min(calc(85vw + 5px), 285px); }
   .customization { bottom: 8px; width: calc(100% - 16px); max-height: 88dvh; padding: 16px 14px; }
   .customization h2 { margin-bottom: 20px; font-size: 1.4rem; }
-  .backgroundPicker { font-size: .9rem; }
-  .backgroundPicker + select { margin-bottom: 14px; }
+  .pickerLabel { font-size: .9rem; }
+  .backgroundSetting { margin-bottom: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -187,8 +187,7 @@ export function FourthScene() {
       ref={sectionRef}
       id="vice-scene-four"
       className={styles.scene}
-      lang="uk"
-      aria-label="Кадр із GTA VI"
+      aria-label="GTA VI scene"
       data-frame-count={scene.frameCount}
       style={sceneStyles}
     >
@@ -197,7 +196,7 @@ export function FourthScene() {
           <Image
             className={styles.poster}
             src={scene.poster}
-            alt="Люсія та Джейсон перед палаючим автомобілем"
+            alt="Lucia and Jason in front of a burning car"
             fill
             loading="lazy"
             placeholder="blur"
