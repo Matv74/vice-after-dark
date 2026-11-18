@@ -107,6 +107,11 @@
 @media (max-width: 767px) {
   .card:first-child .art { aspect-ratio: 1; }
   .card:first-child .art img { object-position: center top; }
+
+  .card[data-card="telegram"] .content {
+    justify-items: end;
+    text-align: right;
+  }
 }
 
 @media (min-width: 768px) {
@@ -137,7 +142,33 @@
 
   .content { width: 52%; }
   .card[data-align="right"] .content { justify-self: end; }
+  .card[data-card="telegram"] .content { width: calc(52% - 100px); }
   .card:hover .art img { transform: scale(1.025); }
+}
+
+.card[href] {
+  display: grid;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.card[href]:hover,
+.card[href]:focus-visible {
+  border-color: #ffb1c9;
+}
+
+.card[href]:focus-visible {
+  outline: 2px solid #ffb1c9;
+  outline-offset: 3px;
+}
+
+.telegramIcon {
+  justify-self: center;
+  display: block;
+  width: clamp(44px, 5vw, 64px);
+  height: auto;
+  clip-path: circle(49.5%);
 }
 
 @media (prefers-reduced-motion: reduce) {

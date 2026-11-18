@@ -1,4 +1,5 @@
-import type { LandingLocale } from "../gtasixcountdown/landing-routes";
+import Image from "next/image";
+import { MAP_PATHS, MEDIA_PATHS, type LandingLocale } from "../gtasixcountdown/landing-routes";
 import { storyCopy } from "./story-copy";
 import styles from "./fifth-scene.module.css";
 
@@ -12,6 +13,7 @@ type CardCopy = {
 type SceneCard = CardCopy & {
   id: "telegram" | "streamers" | "clips" | "news" | "map" | "locations";
   artwork: string;
+  href?: string;
   translations: Record<Exclude<LandingLocale, "en">, CardCopy>;
   mobileArt?: boolean;
   promo?: boolean;
@@ -24,6 +26,7 @@ const cards: readonly SceneCard[] = [
   {
     id: "telegram",
     artwork: "ultimate",
+    href: "https://t.me/gtasixwatch",
     title: "Telegram Channel",
     description: "Follow GTA VI announcements, new trailers, and updates from the community in one place.",
     translations: {
@@ -101,9 +104,13 @@ export function FifthScene({ locale }: { locale: LandingLocale }) {
         <div className={styles.cards}>
           {cards.map(card => {
             const copy = locale === "en" ? card : card.translations[locale];
+            const href = card.id === "streamers" || card.id === "clips"
+              ? MEDIA_PATHS[card.id][locale]
+              : card.id === "map" ? MAP_PATHS[locale] : card.href;
+            const Card = href ? "a" : "article";
 
             return (
-              <article key={card.id} className={styles.card} data-promo={card.promo} data-align={card.align}>
+              <Card key={card.id} className={styles.card} href={href} data-card={card.id} data-promo={card.promo} data-align={card.align}>
                 <picture className={styles.art}>
                   {card.mobileArt && <source media="(max-width: 767px)" srcSet={`${imageRoot}/${card.artwork}-mobile.webp`} />}
                   <img src={`${imageRoot}/${card.artwork}.webp`} alt="" loading="lazy" decoding="async" />
@@ -113,8 +120,11 @@ export function FifthScene({ locale }: { locale: LandingLocale }) {
                   {card.id === "locations" && <span className={styles.soonBadge}>{comingSoon[locale]}</span>}
                   <h2>{copy.title}</h2>
                   <p className={styles.description}>{copy.description}</p>
+                  {card.id === "telegram" && (
+                    <Image className={styles.telegramIcon} src={`${imageRoot}/telegram.png`} alt="" width={512} height={512} unoptimized />
+                  )}
                 </div>
-              </article>
+              </Card>
             );
           })}
         </div>

@@ -161,3 +161,23 @@ The project keeps one portable Agent Skill at `.agents/skills/clone-website/`. C
 MIT
 #   v i c e - a f t e r - d a r k  
  
+### Twitch and YouTube feeds
+
+Set these server-side environment variables in `.env.local` for local development
+and in the hosting environment for production:
+
+```dotenv
+TWITCH_CLIENT_ID=
+TWITCH_CLIENT_SECRET=
+YOUTUBE_API_KEY=
+```
+
+Create the client ID and secret for a Twitch app in the
+[Twitch Developer Console](https://dev.twitch.tv/console/apps). Enable YouTube
+Data API v3 in Google Cloud and use a server-side API key restricted to that API.
+Restart the dev server or redeploy after setting the variables. Keep these values
+out of source control and do not use a `NEXT_PUBLIC_` prefix.
+
+`/streamers` refreshes the Twitch ranking while the tab is visible. `/clips`
+shares an hourly, on-demand cache of clips published in the past 30 days across
+all three languages. Without credentials, each page shows its unavailable state.

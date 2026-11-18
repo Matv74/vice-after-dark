@@ -1,0 +1,125 @@
+.page {
+  flex: 1;
+  padding: clamp(24px, 5vw, 64px) 16px;
+  background: radial-gradient(ellipse at 85% 0%, #40203f, transparent 55%),
+    linear-gradient(180deg, #161628, #171124 54%, #0b0d1a);
+  color: #fff8e9;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.layout {
+  width: min(100%, 1108px);
+  margin-inline: auto;
+}
+
+.header {
+  display: grid;
+  justify-items: start;
+  gap: 18px;
+  margin-block-end: 22px;
+}
+
+.headerRow {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
+.languages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: .875rem;
+}
+
+.languages a {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #ffd3e1;
+}
+
+.languages a:hover,
+.languages a[aria-current="page"] {
+  background: #40203f;
+  color: #fff8e9;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffd3e1;
+  font-size: .875rem;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.header h1 {
+  font: 700 clamp(2.5rem, 8vw, 6rem) / 1 Oswald, "Arial Narrow", sans-serif;
+  text-transform: uppercase;
+}
+
+.frame {
+  position: relative;
+  isolation: isolate;
+  height: clamp(360px, 70svh, 740px);
+  overflow: hidden;
+  border: 1px solid #f3c1e24d;
+  border-radius: clamp(16px, 2vw, 28px);
+  background: #1b1729;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #1b1729;
+}
+
+.controls {
+  position: absolute;
+  z-index: 1;
+  inset: 14px 14px auto auto;
+  display: grid;
+  gap: 6px;
+}
+
+.controls button {
+  width: 46px;
+  height: 46px;
+  border: 1px solid #f3c1e24d;
+  border-radius: 12px;
+  background: #1b1729f2;
+  color: #fff8e9;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.controls button:hover:enabled {
+  background: #40203f;
+}
+
+.controls button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.controls button:focus-visible,
+.languages a:focus-visible,
+.back:focus-visible {
+  outline: 2px solid #ffb1c9;
+  outline-offset: 3px;
+}
+
+.status {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: min(70%, 26rem);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}

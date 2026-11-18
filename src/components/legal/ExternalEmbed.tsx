@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { DEFAULT_LEGAL_LOCALE, isLegalLocale } from "@/config/legal";
+import { DEFAULT_LEGAL_LOCALE, isLegalLocale, type LegalLocale } from "@/config/legal";
 
 const notices = {
   uk: "Після натискання сервіс отримає вашу IP-адресу та може використовувати cookies або сховище браузера.",
@@ -12,9 +12,9 @@ const notices = {
   pl: "Po kliknięciu dostawca otrzyma Twój adres IP i może używać plików cookie lub pamięci przeglądarki.",
 };
 
-export function ProviderNotice({ provider }: { provider: string }) {
+export function ProviderNotice({ provider, locale: preferredLocale }: { provider: string; locale?: LegalLocale }) {
   const segment = usePathname().split("/")[1];
-  const locale = isLegalLocale(segment) ? segment : DEFAULT_LEGAL_LOCALE;
+  const locale = preferredLocale ?? (isLegalLocale(segment) ? segment : DEFAULT_LEGAL_LOCALE);
   return <p>{provider}. {notices[locale]}</p>;
 }
 
@@ -23,14 +23,20 @@ type ExternalEmbedProps = {
   id: string;
   title: string;
   className?: string;
+  locale?: LegalLocale;
+  active?: boolean;
+  onActivate?: () => void;
 };
 
-export function ExternalEmbed({ provider, id, title, className }: ExternalEmbedProps) {
+export function ExternalEmbed({
+  provider, id, title, className, locale: preferredLocale, active = true, onActivate,
+}: ExternalEmbedProps) {
   const [src, setSrc] = useState<string>();
   const segment = usePathname().split("/")[1];
-  const locale = isLegalLocale(segment) ? segment : DEFAULT_LEGAL_LOCALE;
+  const locale = preferredLocale ?? (isLegalLocale(segment) ? segment : DEFAULT_LEGAL_LOCALE);
 
   function load() {
+    onActivate?.();
     const encodedId = encodeURIComponent(id);
     switch (provider) {
       case "YouTube":
@@ -47,7 +53,7 @@ export function ExternalEmbed({ provider, id, title, className }: ExternalEmbedP
     }
   }
 
-  if (src) {
+  if (src && active) {
     return (
       <iframe className={className} src={src} title={title}
         referrerPolicy="strict-origin-when-cross-origin"
@@ -57,7 +63,7 @@ export function ExternalEmbed({ provider, id, title, className }: ExternalEmbedP
 
   return (
     <div>
-      <ProviderNotice provider={provider} />
+      <ProviderNotice provider={provider} locale={locale} />
       <button type="button" onClick={load}>
         {locale === "en" ? "Load" : locale === "pl" ? "Wczytaj" : "Завантажити"} {provider}
         <span className="sr-only"> — {title}</span>
